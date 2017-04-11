@@ -1,0 +1,37 @@
+#divFormLogin
+{
+	width:700px;
+	height:400px;
+	position:absolute;
+	top:50%;
+	left:50%;
+	margin-top:-300px;
+	margin-left:-350px;
+	background-color: #ffffff;
+	border:1px solid #fe0005;
+	border-radius:15px;
+	text-align:center;
+	padding: 10px;
+
+
+	background: #ffffff;
+	background: -moz-linear-gradient(top,  #ffffff 50%, #cccccc 100%);
+	background: -webkit-linear-gradient(top,  #ffffff 50%,#cccccc 100%);
+	background: linear-gradient(to bottom,  #ffffff 50%,#cccccc 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#cccccc',GradientType=0 );
+
+
+}
+
+
+input
+{
+	width: 50%;
+    border: none;
+    padding: 10px;
+    background-color: #545252;
+    border-radius: 7px;
+    color: #ffffff;
+    font-size:14px;
+ 
+}

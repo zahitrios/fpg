@@ -1,0 +1,18 @@
+.with-before::before {
+    content: 'ONLYBEFORE';
+}
+.with-after::after {
+    content: 'ONLYAFTER';
+}
+.with-both::before {
+    content: 'BOTHBEFORE';
+}
+.with-both::after {
+    content: 'BOTHAFTER';
+}
+
+#dom-node {
+    background-color: white;
+    font-family: monospace;
+    font-size: 20px;
+}

@@ -1,0 +1,193 @@
+#containerPrincipal
+{
+    font-size:16px;
+}
+
+.fieldsetZht
+{
+    width: 98%;
+    margin: 0 auto;
+    border-color: #999999;
+}
+
+.fieldSetReporte
+{
+    text-align: left !important;
+}
+
+.botonMostrar
+{
+    color: #fb0001;
+    font-size:12px;
+    margin-left:10px;
+    cursor:pointer;
+}
+
+.oculta
+{
+    display:none;
+}
+
+.exito
+{
+    color:#0a9621;
+}
+
+.error
+{
+    color:#FF0000;
+}
+
+#divListaArchivos
+{
+    display:block;
+    text-align: left;
+    background-color: rgba(255, 255, 255, 1);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 15px;
+    width: 90%;
+    height: 250px;
+    /*position: fixed;*/
+    z-index: 99;
+   /* top: 100px;*/
+    border: 1px solid #59016f;
+    overflow: auto;
+}
+
+#divDetalleErrores
+{
+    display:block;
+    text-align: left;
+    background-color: rgba(255, 255, 255, 1);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 15px;
+    width: 90%;
+    height: auto;
+    /*position: fixed;*/
+    z-index: 99;
+    /* top: 100px;*/
+    border: 1px solid #666666;
+    overflow: auto;
+}
+
+#divSoloErrores
+{
+    display:block;
+    text-align: left;
+    background-color: rgba(255, 255, 255, 1);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 15px;
+    width: 90%;
+    height: 900px;
+    /*position: fixed;*/
+    z-index: 99;
+    border: 1px solid #ff0000;
+    overflow: auto;
+}
+
+.defaultKLB .klbList 
+{
+    text-align: left;
+}
+
+/* Search, drag & drop list */
+
+.gu-mirror {
+  position: fixed !important;
+  margin: 0 !important;
+  z-index: 9999 !important;
+  opacity: 0.8;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
+  filter: alpha(opacity=80);
+}
+.gu-hide {
+  display: none !important;
+}
+.gu-unselectable {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+}
+.gu-transit {
+  opacity: 0;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+  filter: alpha(opacity=0);
+}
+
+.dd-lists {
+  margin: 0 auto;
+  margin-top: 2rem;
+  width: 90%;
+  max-width: 600px;
+  white-space: nowrap;
+}
+
+.dd-list-container {
+  width: 49%;
+  display: inline-block;
+  vertical-align: top;
+  text-align: left;
+  margin-right: 2%;
+  padding: 0.5rem;
+  border: 1px solid #999;
+}
+
+.dd-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dd-list:nth-child(2n) {
+    margin-right: 0;
+}
+
+.dd-list-item {
+  padding: 0.2rem 0.5rem;
+  background-color: #f5f5f5;
+  margin-bottom: 0.5rem;
+  color: #000;
+  font-size: 0.8rem;
+  border: 1px solid #aaa;
+  cursor: move;
+  list-style: none;
+}
+
+.dd-source .dd-list-item.hide {
+    display: none;
+    font-size: 0.8rem;
+}
+
+.dd-dest.clean:after {
+    display: block;
+    content: "Arrastra los documentos aceptados aquí";
+    padding: 0.5rem;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.dd-dest {
+    padding-bottom: 0.5rem;
+}
+
+.dd-list {
+    height: 200px;
+    overflow-y: auto;
+}
+
+.dd-list-search {
+    width: 184px;
+    margin-bottom: 1rem;
+}
+
+.dd-button {
+    margin-bottom: 1rem;
+}
+
+
+
+

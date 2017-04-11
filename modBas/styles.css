@@ -1,0 +1,89 @@
+#containerPrincipal
+{
+    font-size:16px;
+}
+
+.fieldsetZht
+{
+    width: 98%;
+    margin: 0 auto;
+    border-color: #999999;
+}
+
+.fieldSetReporte
+{
+    text-align: left !important;
+}
+
+.botonMostrar
+{
+    color: #fb0001;
+    font-size:12px;
+    margin-left:10px;
+    cursor:pointer;
+}
+
+.oculta
+{
+    display:none;
+}
+
+.exito
+{
+    color:#0a9621;
+}
+
+.error
+{
+    color:#FF0000;
+}
+
+#divListaArchivos
+{
+    display:block;
+    text-align: left;
+    background-color: rgba(255, 255, 255, 1);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 15px;
+    width: 90%;
+    height: 250px;
+    /*position: fixed;*/
+    z-index: 99;
+   /* top: 100px;*/
+    border: 1px solid #59016f;
+    overflow: auto;
+}
+
+#divDetalleErrores
+{
+    display:block;
+    text-align: left;
+    background-color: rgba(255, 255, 255, 1);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 15px;
+    width: 90%;
+    /*height: auto;*/
+    /*position: fixed;*/
+    z-index: 99;
+    /* top: 100px;*/
+    border: 1px solid #666666;
+    overflow: auto;
+}
+
+#divSoloErrores
+{
+    display:block;
+    text-align: left;
+    background-color: rgba(255, 255, 255, 1);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 15px;
+    width: 90%;
+    height: 250px;
+    /*position: fixed;*/
+    z-index: 99;
+    border: 1px solid #ff0000;
+    overflow: auto;
+}
