@@ -11,14 +11,17 @@
   require $KoolControlsFolder."/KoolCalendar/koolcalendar.php"; 
 
 
+
   $koolajax->scriptFolder = "../lib/KoolPHPSuite/KoolControls/KoolAjax";  
 
   $link=conectDBReturn();
   $ds = new MySQLDataSource($link);
   
   $ds->SelectCommand = "SELECT * FROM capacitacion";
+
   $ds->UpdateCommand = "UPDATE capacitacion SET fechaInicio='@fechaInicio', fechaFinalizacion='@fechaFinalizacion', sede='@sede', capacitadores='@capacitadores', noAsistentes='@noAsistentes', convenio_idconvenio='@convenio_idconvenio' WHERE idcapacitacion=@idcapacitacion";
   // $ds->DeleteCommand = "DELETE FROM capacitacion WHERE idcapacitacion=@idcapacitacion";
+
   $ds->InsertCommand = "INSERT INTO capacitacion (fechaInicio,fechaFinalizacion,sede,capacitadores,noAsistentes,convenio_idconvenio) VALUES ('@fechaInicio','@fechaFinalizacion','@sede','@capacitadores','@noAsistentes','@convenio_idconvenio')";
   
   $grid = new KoolGrid("grid");
@@ -39,12 +42,140 @@
   $grid->MasterTable->ShowFunctionPanel = true; 
 
 
+  class MyInsertTemplate implements GridTemplate
+  {
+
+    function Render($_row)
+    {
+      $KoolControlsFolder="../lib/KoolPHPSuite/KoolControls";
+
+      $fechaInicio = new KoolDatePicker("fechaInicio"); //Create calendar object
+      $fechaInicio->scriptFolder = $KoolControlsFolder."/KoolCalendar";//Set scriptFolder
+      $fechaInicio->styleFolder="default";             
+      $fechaInicio->Init();
+
+
+      $fechaFinalizacion = new KoolDatePicker("fechaFinalizacion"); //Create calendar object
+      $fechaFinalizacion->scriptFolder = $KoolControlsFolder."/KoolCalendar";//Set scriptFolder
+      $fechaFinalizacion->styleFolder="default";             
+      $fechaFinalizacion->Init();
+
+
+
+      $html  = '<table align="left" style="width:49%; float:left;">
+                  <tr>
+                    <td align="right">Convenio:</td>
+                    <td align="left" style="padding-left:10px;">
+                      <select id="convenio_idconvenio" name="convenio_idconvenio">
+                        <option value="">Seleccione un convenio</option>';
+
+                        $sql="SELECT * FROM convenio ORDER BY idconvenio";
+                        $res=mysql_query($sql);
+                        if(!$res)
+                          echo mysql_error();
+                        
+                        while($fil=mysql_fetch_assoc($res))
+                        {
+                          $html.='<option value="'.$fil["idconvenio"].'">'.dameNombreEstadoConvenio($fil["idconvenio"])." - ".convierteTimeStampCorto($fil["fechaFirma"])." - $ ".separarMiles($fil["montoTotalConvenio"]).'</option>';
+                        }
+
+      $html.='        </select>
+                    </td>
+                  </tr>
+
+
+                  
+                  <tr>
+                    <td align="right">Fecha de inicio:</td>
+                    <td align="left" style="padding-left:10px;">
+                    '.$fechaInicio->Render().'
+                    </td>
+                  </tr>
+
+
+
+
+                  <tr>
+                    <td align="right">Fecha de fin:</td>
+                    <td align="left" style="padding-left:10px;">
+                    '.$fechaFinalizacion->Render().'
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="2" align="center" style="padding-top:10px;">
+                      <input type="button" value="Cancelar" onclick="grid_cancel_insert(this)" />
+                    </td>
+                  </tr>
+
+                </table>';
+
+
+
+
+      $html  .= '<table align="right" style="width:49%; float:right;">';
+    
+      $html  .= '<tr>
+                  <td align="right">Sede:</td>
+                  <td align="left" style="padding-left:10px;">
+                    <input type="text" name="sede" id="sede" >
+                  </td>
+                </tr>';
+
+
+      $html  .= '<tr>
+                  <td align="right">Capacitadores:</td>
+                  <td align="left" style="padding-left:10px;">
+                    <input type="text" name="capacitadores"  id="capacitadores" >
+                  </td>
+                </tr>';
+
+          $html  .= '<tr>
+                  <td align="right">Número de asistentes:</td>
+                  <td align="left" style="padding-left:10px;">
+                    <input type="text" name="noAsistentes"  id="noAsistentes" >
+                  </td>
+                </tr>';
+
+          $html  .='<tr>
+                    <td colspan="2" align="center" style="padding-top:10px;">
+                      <input type="button" value="Aceptar" onclick="grid_confirm_insert(this)" />
+                    </td>
+                  </tr>';
+
+      $html  .= '</table>';
+
+      $html .='<div style="clear:both;"></div>';
+      return $html;
+    }
+    function GetData($_row)
+    {
+
+        $fechaInicio=$_POST["fechaInicio"];
+        $fechaInicio=explode("/",$fechaInicio);
+        $fechaInicio=$fechaInicio[2]."-".$fechaInicio[1]."-".$fechaInicio[0];
+
+        $fechaFinalizacion=$_POST["fechaFinalizacion"];
+        $fechaFinalizacion=explode("/",$fechaFinalizacion);
+        $fechaFinalizacion=$fechaFinalizacion[2]."-".$fechaFinalizacion[1]."-".$fechaFinalizacion[0];
+
+        return array("convenio_idconvenio"=>$_POST["convenio_idconvenio"],"fechaInicio"=>$fechaInicio,"fechaFinalizacion"=>$fechaFinalizacion,"sede"=>$_POST["sede"],"capacitadores"=>$_POST["capacitadores"],"noAsistentes"=>$_POST["noAsistentes"]);
+    }   
+  }
+  
+  $grid->MasterTable->InsertSettings->Mode = "Template";
+  $grid->MasterTable->InsertSettings->Template = new MyInsertTemplate();
+
+
+
   
   $column = new GridBoundColumn();
   $column->HeaderText = "Id";
   $column->DataField = "idcapacitacion";
   $column->ReadOnly = true;
   $grid->MasterTable->AddColumn($column);
+
+
 
 
   $column = new GridDropDownColumn();
@@ -141,7 +272,7 @@
   </head>
 
 
-  <body onload="cargaFechasIniciales();">
+  <body>
     
     <div id="menuLateral">
       <img src="<?php echo RUTA; ?>img/logo.jpg" style="width:100%;">

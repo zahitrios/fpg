@@ -1349,8 +1349,8 @@
 						} // WHILE RECORRO TODA LA CONSOLIDADA //
 
 
-	 				echo "<br><br>";
-	 				echo "LA DIFERENCIA EN EL MONTO DEL CONVENIO SERÍA: <strong>$ ".separarMiles($diferenciaMontoMaximoPagoConvenio)."</strong><br><br>";
+	 				// echo "<br><br>";
+	 				// echo "LA DIFERENCIA EN EL MONTO DEL CONVENIO SERÍA: <strong>$ ".separarMiles($diferenciaMontoMaximoPagoConvenio)."</strong><br><br>";
 
 	 				//Verifico que el monto por el cual se firmo el convenio alcance
 	 				$sqlMontoTotalConvenio="SELECT montoTotalConvenio,montoMaximoPagoTotal FROM convenio WHERE idconvenio='".$idconvenio."'";
@@ -1361,17 +1361,21 @@
 
 	 				if($diferenciaMontoMaximoPagoConvenio>0 && ($montoMaximoPagoTotal+$diferenciaMontoMaximoPagoConvenio)>$montoFirmadoDelConvenio) //No alcanza
 	 				{	
-	 					$cadenaError="El monto máximo por el que se firmo el convenio es <strong>$ ".separarMiles($montoFirmadoDelConvenio)."</strong> y esta modificación necesita <strong>$ ".separarMiles($diferenciaMontoMaximoPagoConvenio+$montoMaximoPagoTotal)."</strong>";
+	 					//$cadenaError="El monto máximo por el que se firmo el convenio es <strong>$ ".separarMiles($montoFirmadoDelConvenio)."</strong> y esta modificación necesita <strong>$ ".separarMiles($diferenciaMontoMaximoPagoConvenio+$montoMaximoPagoTotal)."</strong>";
+						echo "Esta modificación a la base de datos es de: $".separarMiles($diferenciaMontoMaximoPagoConvenio)."<br>";
+	 					echo "El monto máximo del convenio autorizado es: $".separarMiles($montoFirmadoDelConvenio)."<br>";
+	 					echo "El nuevo monot máximo de pago es: $".separarMiles($diferenciaMontoMaximoPagoConvenio+$montoMaximoPagoTotal)."<br>";
 						echo $cadenaError."<span class='error'>RECHAZADA</span><br>";
 						guardaErrorModificacion($idmodificaciones,$cadenaError);
 	 				}
 	 				else
 	 				{
-	 					echo "El monto máximo por el que se firmo el convenio es <strong>$ ".separarMiles($montoFirmadoDelConvenio)."</strong> y esta modificación necesita <strong>$ ".separarMiles($diferenciaMontoMaximoPagoConvenio+$montoMaximoPagoTotal)."</strong> <span class='exito'>SUCEPTIBLE DE SER APROBADA</span>";
+	 					echo "Esta modificación a la base de datos es de: $".separarMiles($diferenciaMontoMaximoPagoConvenio)."<br>";
+	 					echo "El monto máximo del convenio autorizado es: $".separarMiles($montoFirmadoDelConvenio)."<br>";
+	 					echo "El nuevo monot máximo de pago es: $".separarMiles($diferenciaMontoMaximoPagoConvenio+$montoMaximoPagoTotal)."<br>";
+	 					echo "<span class='exito'>SUCEPTIBLE DE SER APROBADA</span>";
+	 					//echo "El monto máximo por el que se firmo el convenio es <strong>$ ".separarMiles($montoFirmadoDelConvenio)."</strong> y esta modificación necesita <strong>$ ".separarMiles($diferenciaMontoMaximoPagoConvenio+$montoMaximoPagoTotal)."</strong> <span class='exito'>SUCEPTIBLE DE SER APROBADA</span>";
 	 				}
-
-						
-
 					?>
 					<br>
 					<br>
@@ -1773,6 +1777,7 @@
 				$resAho=mysql_query($sqlAho);
 				$filAho=mysql_fetch_assoc($resAho);
 				
+				$updateArray[]="nombre='".$filMod["nombreAhorradorDebeDecir"]."'";
 				$updateArray[]="sps='".$filMod["parteSocialDebeDecir"]."'";
 				$updateArray[]="sca='".$filMod["cuentasDeAhorroDebeDecir"]."'";
 				$updateArray[]="sci='".$filMod["cuentaDeInversionDebeDecir"]."'";
@@ -1785,7 +1790,6 @@
 
 				$update.=implode(",",$updateArray);
 				$update.=" WHERE folioIdentificador='".$filMod["folioIdentificador"]."'";
-				
 
 				if($resUpdate=mysql_query($update))
 				{
@@ -1815,6 +1819,7 @@
 			{
 				echo "<br>MODIFICANDO NOMBRE DE: ".$filMod["nombreAhorradorDice"]." - ";
 				$sql="UPDATE ahorrador SET nombre='".$filMod["nombreAhorradorDebeDecir"]."' WHERE folioIdentificador='".$filMod["folioIdentificador"]."'";
+				
 				if($res=mysql_query($sql))
 				{
 					$ahorradoresActualizados++;

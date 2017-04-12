@@ -257,7 +257,11 @@
 			if($campo!="hojaDocumentoOriginal" && $campo!="filaDocumentoOriginal")
 				$fila[]=$valor;
 		}
-		$writer->addRow($fila); 
+
+		if(filaEnCeros($fila)==false)
+			$writer->addRow($fila); 
+		
+
 		$contador++;
 	}
 	 

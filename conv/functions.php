@@ -577,98 +577,115 @@ function formEdit()
 			
 			<strong>Documentos aceptados:</strong>
 			<ul>
-				<?php $options = dameIdDocumentosSinAgregar($idrevisionesTemporales);
+				<?php $options = dameIdDocumentos($idrevisionesTemporales);
 				foreach($options as $key => $opt): ?>
 					<li><?= $opt[1]; ?></li>
 				<?php endforeach; ?>
 			</ul>
 			<br><br>
 
-			<!-- Drag & drop module -->
-			<strong>Agregar documentos permitidos:</strong>
+				
+			<?php
+				if($convenio['idstatusConvenio']>1 && $convenio['idstatusConvenio']<5) //Incluye firmado, operacion, proceso
+				{
+					?>
+
+					<!-- Drag & drop module -->
+					<strong>Agregar documentos permitidos:</strong>			
+						<div class="dd-lists">
+							<!-- De este input se envían los ids de documentos permitidos separados por comas -->
+							<input id="selected-input" type="hidden" name="documentosValor">
+
+							<div class="dd-list-container">
+								<input id="dd-list-search" type="text" class="dd-list-search" placeholder="Buscar...">
+								<button type="button" id="dd-add-all" class="dd-button">>> Todos</button>
+								<ul id="src-list" class="dd-source dd-list">
+									<?php 
+										$options = dameIdDocumentos($idrevisionesTemporales);
+										$todos=dameGridTable("documentosValor","nombre");
+										$options2=array_diff ( $todos, $options);
+
+									foreach($options2 as $key => $opt): ?>
+										<li class="dd-list-item" data-value="<?= $opt[0]?>"><?= $opt[1] ?></li>
+									<?php endforeach; ?>
+
+								</ul>
+							</div>
+							<div class="dd-list-container">
+								<button type="button" id="dd-delete-all" class="dd-button">X Borrar todos</button>
+								<ul id="dest-list" class="dd-dest dd-list clean">
+								</ul>
+							</div>
+						</div>
+						<input type="button" class="botonRojo" value="Guardar documentos" />
+
+					
+
+					<script>
+						// Search, drag & drop list
+						(function () {
+
+							var search = document.getElementById("dd-list-search");
+							var selected_input = document.getElementById("selected-input");
+							var src_list = document.getElementById("src-list");
+							var dest_list = document.getElementById("dest-list");
+							var add_all_btn = document.getElementById("dd-add-all");
+							var delete_all_btn = document.getElementById("dd-delete-all");
+
+							change();
+
+							function change () {
+						    var dest_list_items = dest_list.querySelectorAll(".dd-list-item");
+						    dest_list.classList.toggle("clean", (dest_list_items.length <= 0));
+								var selected = [];
+								for (var i = 0; i < dest_list_items.length; i++) {
+									var item = dest_list_items[i];
+									selected.push(item.dataset.value);
+								}
+								selected_input.value = selected.join(",");
+							}
+
+							add_all_btn.addEventListener("click", function () {
+								var src_list_items = src_list.querySelectorAll(".dd-list-item");
+								for (var i = 0; i < src_list_items.length; i++)
+									dest_list.appendChild(src_list_items[i]);
+								change();
+							});
+
+							delete_all_btn.addEventListener("click", function () {
+								var dest_list_items = dest_list.querySelectorAll(".dd-list-item");
+								for (var i = 0; i < dest_list_items.length; i++)
+									src_list.appendChild(dest_list_items[i]);
+								change();
+							});
+
+							dragula([src_list, document.getElementById("dest-list")], {
+								revertOnSpill: true
+							}).on('drop', function (el) {
+						    change();
+						  });
+
+							search.addEventListener("keyup", function (event) {
+								var input = search.value;
+								var src_list_items = src_list.querySelectorAll(".dd-list-item");
+								for (var i = 0; i < src_list_items.length; i++) {
+									var item = src_list_items[i];
+									var option = item.textContent;
+									item.classList.toggle("hide", input && !(option.toLowerCase().indexOf(input.toLowerCase()) >= 0));
+									console.log(option, input && (option.indexOf(input) >= 0));
+								}
+							});
+
+						})();					
+					</script>
+					<!-- /Drag & drop module -->	
+					<?php
+				}
+			?>
+
 			
-				<div class="dd-lists">
-					<!-- De este input se envían los ids de documentos permitidos separados por comas -->
-					<input id="selected-input" type="hidden" name="documentosValor">
 
-					<div class="dd-list-container">
-						<input id="dd-list-search" type="text" class="dd-list-search" placeholder="Buscar...">
-						<button type="button" id="dd-add-all" class="dd-button">>> Todos</button>
-						<ul id="src-list" class="dd-source dd-list">
-							<?php $options = dameIdDocumentos($idrevisionesTemporales);
-							foreach($options as $key => $opt): ?>
-								<li class="dd-list-item" data-value="<?= $opt[0]?>"><?= $opt[1] ?></li>
-							<?php endforeach; ?>
-						</ul>
-					</div>
-					<div class="dd-list-container">
-						<button type="button" id="dd-delete-all" class="dd-button">X Borrar todos</button>
-						<ul id="dest-list" class="dd-dest dd-list clean">
-						</ul>
-					</div>
-				</div>
-				<input type="button" class="botonRojo" value="Guardar documentos" />
 
-			
-
-			<script>
-				// Search, drag & drop list
-				(function () {
-
-					var search = document.getElementById("dd-list-search");
-					var selected_input = document.getElementById("selected-input");
-					var src_list = document.getElementById("src-list");
-					var dest_list = document.getElementById("dest-list");
-					var add_all_btn = document.getElementById("dd-add-all");
-					var delete_all_btn = document.getElementById("dd-delete-all");
-
-					change();
-
-					function change () {
-				    var dest_list_items = dest_list.querySelectorAll(".dd-list-item");
-				    dest_list.classList.toggle("clean", (dest_list_items.length <= 0));
-						var selected = [];
-						for (var i = 0; i < dest_list_items.length; i++) {
-							var item = dest_list_items[i];
-							selected.push(item.dataset.value);
-						}
-						selected_input.value = selected.join(",");
-					}
-
-					add_all_btn.addEventListener("click", function () {
-						var src_list_items = src_list.querySelectorAll(".dd-list-item");
-						for (var i = 0; i < src_list_items.length; i++)
-							dest_list.appendChild(src_list_items[i]);
-						change();
-					});
-
-					delete_all_btn.addEventListener("click", function () {
-						var dest_list_items = dest_list.querySelectorAll(".dd-list-item");
-						for (var i = 0; i < dest_list_items.length; i++)
-							src_list.appendChild(dest_list_items[i]);
-						change();
-					});
-
-					dragula([src_list, document.getElementById("dest-list")], {
-						revertOnSpill: true
-					}).on('drop', function (el) {
-				    change();
-				  });
-
-					search.addEventListener("keyup", function (event) {
-						var input = search.value;
-						var src_list_items = src_list.querySelectorAll(".dd-list-item");
-						for (var i = 0; i < src_list_items.length; i++) {
-							var item = src_list_items[i];
-							var option = item.textContent;
-							item.classList.toggle("hide", input && !(option.toLowerCase().indexOf(input.toLowerCase()) >= 0));
-							console.log(option, input && (option.indexOf(input) >= 0));
-						}
-					});
-
-				})();					
-			</script>
-			<!-- /Drag & drop module -->					
 		</div>
 
 		

@@ -1886,12 +1886,23 @@
 	}
 
 
-	function getNombreBanco($id)
+	function filaEnCeros($fila)
+	{
+		foreach($fila as $indice => $valor)
+		{
+			if($valor!=0 && $valor!="")
+				return false;
+		}
+
+		return true;
+	}
+
+	function getNombreBanco($idbancos)
 	{
 		$link="";
 		global $link;
 		
-		$sql="SELECT nombreCorto FROM  bancos WHERE idbancos='".$id."'";
+		$sql="SELECT nombreCorto FROM  bancos WHERE idbancos='".$idbancos."'";
 		$res=mysql_query($sql);
 		$fil=mysql_fetch_assoc($res);
 		return $fil["nombreCorto"];

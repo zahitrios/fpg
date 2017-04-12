@@ -238,6 +238,13 @@ function cuentaProceso(fileD)
 }
 
 
+function agregaDocumentosValorConvenio()
+{
+	var documentosValor=document.getElementById("selected-input").value;
+	alert (documentosValor);
+}
+
+
 
 
 $(function() { //shorthand document.ready function
