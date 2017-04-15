@@ -1757,17 +1757,13 @@
 		{
 			$ahorradoresActualizados=0;
 
-
-
-
-
 			//// MODIFICO SALDOS DE LA CONSOLIDADA TABLA ahorrador  ////
-			$sqlMod="SELECT * FROM modificacionesConsolidada WHERE modificaciones_idmodificaciones='".$idmodificaciones."' AND UPPER(observacionesDice) LIKE '%SALDOS DEL AHORRADOR'";
+			$sqlMod="SELECT * FROM modificacionesConsolidada WHERE modificaciones_idmodificaciones='".$idmodificaciones."' AND (UPPER(observacionesDice) ='MODIFICACION' OR UPPER(observacionesDice) ='MODIFICACIÓN')";
 			$resMod=mysql_query($sqlMod);
 			while($filMod=mysql_fetch_assoc($resMod))
 			{
 
-				echo "<br>MODIFICANDO SALDOS DE: ".$filMod["nombreAhorradorDice"]." - ";
+				echo "<br>MODIFICANDO AL AHORRADOR <strong>".$filMod["nombreAhorradorDice"]."</strong> - ";
 				
 				$update="UPDATE ahorrador SET ";
 				$updateArray=Array();
@@ -1776,6 +1772,7 @@
 				$sqlAho="SELECT * FROM ahorrador WHERE folioIdentificador='".$filMod["folioIdentificador"]."'";
 				$resAho=mysql_query($sqlAho);
 				$filAho=mysql_fetch_assoc($resAho);
+				
 				
 				$updateArray[]="nombre='".$filMod["nombreAhorradorDebeDecir"]."'";
 				$updateArray[]="sps='".$filMod["parteSocialDebeDecir"]."'";
@@ -1791,10 +1788,19 @@
 				$update.=implode(",",$updateArray);
 				$update.=" WHERE folioIdentificador='".$filMod["folioIdentificador"]."'";
 
+				
 				if($resUpdate=mysql_query($update))
 				{
 					$ahorradoresActualizados++;
-					echo "<span class='exito'> CORRECTO </span>";
+					echo "<span class='exito'> CORRECTO </span><br>";
+
+					// ANTES DEL UPDATE TODO LO ANTERIOR VIENE EN $filAho //
+					//echo "<br>guardando el historico del ahorrador<br>";
+
+					guardaHistorialAhorradorConsolidada($filAho);
+
+					// MOSTRAMOS LO QUE DECIA Y LO QUE AHORA ES
+					muestraAntesYDespuesAhorradorConsolidada($filAho,$filMod["folioIdentificador"]);
 				}
 				else
 				{
@@ -1805,32 +1811,6 @@
 				echo "<br>";				
 			}
 			//// MODIFICO SALDOS DE LA CONSOLIDADA TABLA ahorrador  ////
-
-
-
-
-
-
-			
-			// TRAIGO TODAS LAS MODIFICACIONES DE LA BASE CONSOLIDADA EN NOMBRE TABLA ahorrador //
-			$sqlMod="SELECT * FROM modificacionesConsolidada WHERE modificaciones_idmodificaciones='".$idmodificaciones."' AND UPPER(observacionesDice) LIKE '%NOMBRE DEL AHORRADOR'";
-			$resMod=mysql_query($sqlMod);
-			while($filMod=mysql_fetch_assoc($resMod))
-			{
-				echo "<br>MODIFICANDO NOMBRE DE: ".$filMod["nombreAhorradorDice"]." - ";
-				$sql="UPDATE ahorrador SET nombre='".$filMod["nombreAhorradorDebeDecir"]."' WHERE folioIdentificador='".$filMod["folioIdentificador"]."'";
-				
-				if($res=mysql_query($sql))
-				{
-					$ahorradoresActualizados++;
-					echo "<span class='exito'> CORRECTO </span>";
-				}
-				else
-					echo "<span class='error'> OCURRIÓ UN ERROR AL MODIFICAR EL AHORRADOR </span>";
-
-				
-			}
-			// TRAIGO TODAS LAS MODIFICACIONES DE LA BASE CONSOLIDADA EN NOMBRE TABLA ahorrador //
 
 
 
@@ -2079,13 +2059,13 @@
 						$resAnAh=mysql_query($sqlAnAh);
 						if(mysql_num_rows($resAnAh)>0)
 						{
-							echo "Buscando en el rubro <strong>".$tipoDocumento."</strong> con el folio ".$folio." y el importe ".$importe;
+							echo "Buscando en el rubro <strong>".$tipoDocumento."</strong> con el folio ".$folio." y el importe $ ".separarMiles($importe);
 							echo "<span class='exito'> ENCONTRADO </span>";
 							echo "<br>";
 							//Busco lo que debe decir
 							$filAnAh=mysql_fetch_row($resAnAh);
 							$idTabla=$filAnAh[0];
-							echo "Actualizando  por <strong>".$tipoDocumento2."</strong> con el folio ".$folio2." y el importe ".$importe2;
+							echo "Actualizando  por <strong>".$tipoDocumento2."</strong> con el folio ".$folio2." y el importe $ ".separarMiles($importe2);
 							$sqlDD="UPDATE ".$tabla." SET tipoDocumento='".$tipoDocumento2."', folio='".$folio2."', importe='".$importe2."' WHERE ".$idTablaC."='".$idTabla."'";
 							$resDD=mysql_query($sqlDD);
 							if($resDD)

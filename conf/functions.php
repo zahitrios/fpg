@@ -1843,6 +1843,36 @@
 		return $fil["idahorrador"];
 	}
 
+	function guardaHistorialAhorradorConsolidada($datosAnteriores)
+	{
+		$sql="INSERT INTO historicoAhorrador (folioIdentificador, nombre, direccion, montoAl100, montoAl70, montoMaximo, sca, sci, sps, sdg, scnc, spc, sod, baja, folioBaseDatos, ahorrador_idahorrador ) VALUES ('".$datosAnteriores["folioIdentificador"]."', '".$datosAnteriores["nombre"]."', '".$datosAnteriores["direccion"]."', '".$datosAnteriores["montoAl100"]."', '".$datosAnteriores["montoAl70"]."', '".$datosAnteriores["montoMaximo"]."', '".$datosAnteriores["sca"]."', '".$datosAnteriores["sci"]."', '".$datosAnteriores["sps"]."', '".$datosAnteriores["sdg"]."', '".$datosAnteriores["scnc"]."', '".$datosAnteriores["spc"]."', '".$datosAnteriores["sod"]."', '".$datosAnteriores["baja"]."', '".$datosAnteriores["folioBaseDatos"]."', '".$datosAnteriores["idahorrador"]."')";
+		$res=mysql_query($sql);
+		if(!$res)
+			echo "<br>error: <br>".$sql."<br>".mysql_error()."<br>";
+	}
+
+	function muestraAntesYDespuesAhorradorConsolidada($datosAnteriores,$folioIdentificador)
+	{
+		$camposParaVerificar=Array("nombre","montoAl100","montoAl70","montoMaximo","sca","sci","sps","sdg","scnc","spc","sod");
+		$leyendasParaVerificar=Array("nombre","monto al 100%","monto al 70%","monto máximo de pago","saldo en cuentas de ahorro","saldo en cuentas de inversión","saldo en parte social","saldo en depósitos en garantía","saldo en cheques no cobrados","saldo en préstamos a cargo","saldo en otros depósitos");
+
+
+		$sql="SELECT * FROM ahorrador WHERE folioIdentificador='".$folioIdentificador."'";
+		$res=mysql_query($sql);
+		$fil=mysql_fetch_assoc($res);
+
+		foreach($camposParaVerificar as $indice => $campo)
+		{
+			if($datosAnteriores[$campo]!=$fil[$campo])
+			{
+				if($campo!="nombre")
+					echo "El campo ".$leyendasParaVerificar[$indice]." decía <strong>$ ".separarMiles($datosAnteriores[$campo])."</strong> ahora dice <strong>$ ".separarMiles($fil[$campo])."</strong><br>";
+				else
+					echo "El campo ".$leyendasParaVerificar[$indice]." decía <strong>".$datosAnteriores[$campo]."</strong> ahora dice <strong>".$fil[$campo]."</strong><br>";
+			}
+		}
+	}
+
 
 	function muestraCuadroArchivos($idrevisionesTemporales)
 	{

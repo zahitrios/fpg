@@ -156,8 +156,8 @@
         $fechaInicio=$fechaInicio[2]."-".$fechaInicio[1]."-".$fechaInicio[0];
 
         $fechaFinalizacion=$_POST["fechaFinalizacion"];
-        $fechaFinalizacion=explode("/",$fechaFinalizacion);
-        $fechaFinalizacion=$fechaFinalizacion[2]."-".$fechaFinalizacion[1]."-".$fechaFinalizacion[0];
+        $fechaFinalizacionP=explode("/",$fechaFinalizacion);
+        $fechaFinalizacion=$fechaFinalizacionP[2]."-".$fechaFinalizacionP[1]."-".$fechaFinalizacionP[0];
 
         return array("convenio_idconvenio"=>$_POST["convenio_idconvenio"],"fechaInicio"=>$fechaInicio,"fechaFinalizacion"=>$fechaFinalizacion,"sede"=>$_POST["sede"],"capacitadores"=>$_POST["capacitadores"],"noAsistentes"=>$_POST["noAsistentes"]);
     }   
