@@ -1915,6 +1915,28 @@
 		<?php
 	}
 
+	function dameSaldoParaMinistrarAhorrador($folioIdentificador)
+	{
+		global $link;
+		$sqlAhorrador="SELECT * FROM ahorrador WHERE folioIdentificador='".$folioIdentificador."'";
+		$resAhorrador=mysql_query($sqlAhorrador);
+		$filAhorrador=mysql_fetch_assoc($resAhorrador);
+
+		$montoOriginalParaMinistrar=$filAhorrador["montoMaximo"];
+
+		$sqlMinistrado="SELECT SUM(montoMinistrado) AS total FROM ahorradoresMinistrados WHERE ahorrador_idahorrador='".$filAhorrador["idahorrador"]."'";
+		$resMinistrado=mysql_query($sqlMinistrado);
+		if(mysql_num_rows($resMinistrado)>0)
+		{
+			$filMinistrado=mysql_fetch_assoc($resMinistrado);
+			return $montoOriginalParaMinistrar-$filMinistrado["total"];
+		}
+
+		else
+			return $montoOriginalParaMinistrar;
+
+	}
+
 
 	function filaEnCeros($fila)
 	{
@@ -1929,7 +1951,6 @@
 
 	function getNombreBanco($idbancos)
 	{
-		$link="";
 		global $link;
 		
 		$sql="SELECT nombreCorto FROM  bancos WHERE idbancos='".$idbancos."'";

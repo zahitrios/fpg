@@ -6,6 +6,7 @@
 	$sql[]="TRUNCATE ministracionesTemporales";
 	$sql[]="TRUNCATE erroresMinistracionesTemporales";
 	$sql[]="TRUNCATE registrosMinistraciones";
+	$sql[]="TRUNCATE ahorradoresMinistrados";
 
 
 	foreach($sql as $k => $v)

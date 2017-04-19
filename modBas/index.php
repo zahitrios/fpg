@@ -192,7 +192,8 @@
 		
 		$ds->SelectCommand = "SELECT modificaciones.idmodificaciones,
 									 modificaciones.fecha,									 
-									 modificaciones.errores,
+									 modificaciones.errores, 
+									 IF(modificaciones.aplicada=1,'SI','NO') AS aplicada,  
 									 SUBSTRING(modificaciones.archivo,13) AS archivo 
 									 FROM modificaciones ORDER BY fecha DESC ";
 
@@ -238,7 +239,15 @@
 		$column = new GridBoundColumn();
 		$column->HeaderText = "Errores";
 		$column->DataField = "errores";		
+		$grid->MasterTable->AddColumn($column);	
+
+		$column = new GridBoundColumn();
+		$column->HeaderText = "Aplicada";
+		$column->DataField = "aplicada";		
 		$grid->MasterTable->AddColumn($column);		
+
+
+
 
 		$grid->Localization->Load("../lib/KoolPHPSuite/KoolControls/KoolGrid/localization/es.xml");
 		$grid->Process();

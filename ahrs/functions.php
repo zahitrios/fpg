@@ -36,9 +36,9 @@
 		$idahorrador=$fil["idahorrador"];
 		$nombre=$fil["nombre"];
 
-		echo "MOSTRANDO DETALLES EN SALDOS DEL AHORRADOR <br><strong>".$nombre."</strong><br>".$folioIdentificador."<br><br>";
 
-		
+
+		echo "MOSTRANDO DETALLES EN SALDOS DEL AHORRADOR <br><strong>".$nombre."</strong><br>".$folioIdentificador."<br><br>";
 
 		// BUSCO LOS DETALLES DEL AHORRADOR //
 		$tablas=Array('ahorradorParteSocial','ahorradorCuentasAhorro','ahorradorCuentasInversion','ahorradorOtrosDepositos','ahorradorDepositosGarantia','ahorradorChequesNoCobrados','ahorradorPrestamosCargo');
@@ -59,6 +59,27 @@
 					}
 				echo "</ul>";
 			}
+		}
+
+		echo "<br><br>";
+		//BUSCO SI EL AHORRADOR HA SIDO MINISTRADO
+		$sql="SELECT * FROM ahorradoresMinistrados INNER JOIN registrosMinistraciones ON idregistrosMinistraciones=registrosMinistraciones_idregistrosMinistraciones INNER JOIN ministracionesTemporales ON idministracionesTemporales=ministracionesTemporales_idministracionesTemporales WHERE ahorrador_idahorrador='".$idahorrador."'";
+		$res=mysql_query($sql);
+		if(mysql_num_rows($res)>0)
+		{
+			echo "<strong>EL AHORRADOR CUENTA CON MINISTRACIONES</strong><br><br>";
+			while($fil=mysql_fetch_assoc($res))
+			{
+				echo "<span class='separador'></span>";
+				echo "Lote de ministración: ".$fil["lote"]."<br>";
+				echo "Monto ministrado: $ ".separarMiles($fil["montoMinistrado"])."<br>";
+				echo "Saldo actual pendiente de ministrar: $ ".separarMiles(dameSaldoParaMinistrarAhorrador($fil["folioIdentificador"]))."<br>";
+				echo "<br>";
+			}
+		}
+		else
+		{
+			echo "<strong>EL AHORRADOR NO HA SIDO MINISTRADO</strong>";
 		}
 	}
 

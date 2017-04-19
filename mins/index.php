@@ -92,6 +92,10 @@
 								aprobarMinistracion();
 							break;
 
+							case "comienzaActualizaciones":
+								comienzaActualizaciones();
+							break;
+
 							default:								
 								formularioSubida();
 								gridRevisiones();
@@ -417,7 +421,7 @@
 
 
 
-		//Busco si ya hay convenios firmados con ese estado, publicados o en proceso
+		//BUSCO SI YA HAY CONVENIOS FIRMADOS CON ESE ESTADO, PUBLICADOS O EN PROCESO
 		$sql="SELECT * FROM convenio WHERE estado_idestado='".$idEstado."' AND statusConvenio_idstatusConvenio IN (3,4)"; 
 		$res=mysql_query($sql);
 		if(mysql_num_rows($res)<=0) //No hay convenios firmados con ese estado
@@ -431,16 +435,19 @@
 			<?php
 			die;
 		}
+
+
 		
 	
-			//Si hay convenios con el estado
-			echo "Seleccione el convenio que desea ministrar<br>";
-			echo "<select name='convenio' required>";
-				while($fil=mysql_fetch_assoc($res))
-				{
-					echo "<option value='".$fil["idconvenio"]."'>".$fil["idconvenio"].".-  ".convierteTimeStampCorto($fil["fechaFirma"])."</option>";
-				}
-			echo "</select>";
+
+		//SI HAY CONVENIOS CON EL ESTADO
+		echo "Seleccione el convenio que desea ministrar<br>";
+		echo "<select name='convenio' required>";
+			while($fil=mysql_fetch_assoc($res))
+			{
+				echo "<option value='".$fil["idconvenio"]."'>".$fil["idconvenio"].".-  ".convierteTimeStampCorto($fil["fechaFirma"])." $ ".separarMiles($fil["montoTotalConvenio"])."</option>";
+			}
+		echo "</select>";
 
 
 			
@@ -481,6 +488,9 @@
 		global $_REQUEST;
 		include("./classes.php"); 
 
+		// foreach($_REQUEST as $k => $v)
+		// 	echo $k."->".$v."<br>";
+
 
 		$idEstado=$_REQUEST["idEstado"];
 		$idConvenio=$_REQUEST["convenio"];
@@ -491,16 +501,14 @@
 
 
 		//Inserto la revision
-		$sql="INSERT INTO ministracionesTemporales (archivo, convenio_idconvenio) VALUES ('".$file."','".$idConvenio."')";
+		$sql="INSERT INTO ministracionesTemporales (archivo, convenio_idconvenio, lote) VALUES ('".$file."','".$idConvenio."','".$lote."')";
 		$res=mysql_query($sql);
 		$idministracionesTemporales=mysql_insert_id();
 		guardaLog(dameIdUserMd5($_SESSION["i"]),11,"ministracionesTemporales",$idministracionesTemporales);
 
 
-
-
 		//Primero busco cuantas ministraciones tiene ya ese convenio y que el lote coincida
-		$sql="SELECT COUNT(*) AS total FROM ministraciones WHERE convenio_idconvenio='".$idConvenio."'";
+		$sql="SELECT COUNT(*) AS total FROM ministracionesTemporales INNER JOIN statusMinistracion ON idstatusMinistracion=statusMinistracion_idstatusMinistracion  WHERE convenio_idconvenio='".$idConvenio."' AND idstatusMinistracion IN(2,4)"; //Busco las ministraciones que hayan sido aprobadas y/o ministradas
 		$res=mysql_query($sql);
 		$fil=mysql_fetch_assoc($res);
 		$loteDeberia=$fil["total"]+1;
@@ -510,7 +518,7 @@
 			echo $cadenaError."<br>";
 			guardaErrorRevisionMinistracion($idministracionesTemporales,$cadenaError);			
 		}
-
+		echo "<br>";
 
 
 		// INSERTO LOS REGISTROS //
@@ -521,7 +529,8 @@
 		$resClean=mysql_query($sqlClean);
 
 
-		$foliosMalos=Array();
+		$foliosMalos=Array("0","1");
+
 
 		
 		//BUSCO FOLIOS QUE NO ESTÉN EN EL CONVENIO
@@ -544,6 +553,10 @@
 			echo "</div>";
 		}		
 		echo "<br><br>";
+		//BUSCO FOLIOS QUE NO ESTÉN EN EL CONVENIO
+
+
+
 
 
 
@@ -568,6 +581,10 @@
 			echo "</div>";
 		}		
 		echo "<br><br>";
+		//BUSCO FOLIOS QUE ESTEN EN BAJA
+
+
+
 
 
 
@@ -593,20 +610,113 @@
 			echo "</div>";
 		}		
 		echo "<br><br>";
+		//BUSCO FOLIOS REPETIDOS EN ESTA SOLICITUD DE MINISTRACION
+
+
+
+
+
+
+
+
+		//BUSCO QUE LOS NOMBRES SEAN LOS CORRECTOS DEL CONVENIO
+		$sqlFol="SELECT nombreAhorrador FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND nombreAhorrador NOT IN(SELECT nombre FROM ahorrador INNER JOIN convenio_has_ahorrador ON ahorrador_idahorrador=idahorrador WHERE convenio_idconvenio='".$idConvenio."')";
+		$resFol=mysql_query($sqlFol);
+		echo "Nombres no encontrados en el convenio: <strong>".mysql_num_rows($resFol)."</strong>";
+		if(mysql_num_rows($resFol)>0)
+		{
+			echo "<span class='botonMostrar' onclick='muestraOculta(\"divNombresNoEncontrados\");' >Mostrar/Ocultar</span>";
+			echo "<div class='oculta' id='divNombresNoEncontrados'>";						
+				echo "<ul>";									
+					while($filFol=mysql_fetch_assoc($resFol))
+					{
+						$cadenaError="El siguiente nombre no se encontró en el convenio: <strong>".$filFol["nombreAhorrador"]."</strong> ";
+						echo "<li><span class='error'>".$cadenaError."</span></li>";
+						guardaErrorMinistracion($idministracionesTemporales,$cadenaError);
+					}
+				echo "</ul>";
+			echo "</div>";
+		}		
+		echo "<br><br>";
+		//BUSCO QUE LOS NOMBRES SEAN LOS CORRECTOS DEL CONVENIO
+
+
+
+
+
+
+
+
+
+		//VERIFICO QUE LAS SUMAS SEAN CORRECTAS
+		$sqlFol="SELECT *,(parteSocial+cuentasAhorro+cuentasInversion+depositosGarantia+chequesNoCobrados+otrosDepositos+prestamosCargo) AS suma FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND folioIdentificador NOT IN(".implode(",",$foliosMalos).") AND (parteSocial+cuentasAhorro+cuentasInversion+depositosGarantia+chequesNoCobrados+otrosDepositos+prestamosCargo) <> saldoTotal"; 
+		$resFol=mysql_query($sqlFol);
+		echo "Montos mal calculados por ahorrador: <strong>".mysql_num_rows($resFol)."</strong>";
+		if(mysql_num_rows($resFol)>0)
+		{
+			echo "<span class='botonMostrar' onclick='muestraOculta(\"divMontosMalCalculados\");' >Mostrar/Ocultar</span>";
+			echo "<div class='oculta' id='divMontosMalCalculados'>";						
+				echo "<ul>";									
+					while($filFol=mysql_fetch_assoc($resFol))
+					{
+						$cadenaError="La suma de montos del ahorrador: <strong>".$filFol["nombreAhorrador"]."</strong> debe ser <strong>$ ".separarMiles($filFol["suma"])."</strong> y el archivo indica <strong>$ ".separarMiles($filFol["saldoTotal"])."</strong> ";
+						echo "<li><span class='error'>".$cadenaError."</span></li>";
+						guardaErrorMinistracion($idministracionesTemporales,$cadenaError);
+						$foliosMalos[]=$filFol["folioIdentificador"];
+					}
+				echo "</ul>";
+			echo "</div>";
+		}	
+		//VERIFICO QUE LAS SUMAS SEAN CORRECTAS
+		echo "<br><br>";
+
+
+
+
+
+		// VERIFICO QUE EL MONTO A MINISTRAR SEA EL 70%$sqlFol="SELECT *,(parteSocial+cuentasAhorro+cuentasInversion+depositosGarantia+chequesNoCobrados+otrosDepositos+prestamosCargo) AS suma FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND folioIdentificador NOT IN(".implode(",",$foliosMalos).") AND (parteSocial+cuentasAhorro+cuentasInversion+depositosGarantia+chequesNoCobrados+otrosDepositos+prestamosCargo) <> saldoTotal"; 
+		$sqlFol="SELECT *,ROUND((saldoTotal*0.70),2) AS paraMinistrar FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND folioIdentificador NOT IN(".implode(",",$foliosMalos).") AND ROUND((saldoTotal*0.70),2) <> montoMinistrar"; 
+		$resFol=mysql_query($sqlFol);
+		echo "Motos para ministrar mal calculados por ahorrador: <strong>".mysql_num_rows($resFol)."</strong>";
+		if(mysql_num_rows($resFol)>0)
+		{
+			echo "<span class='botonMostrar' onclick='muestraOculta(\"divMontosMinistrarMalCalculados\");' >Mostrar/Ocultar</span>";
+			echo "<div class='oculta' id='divMontosMinistrarMalCalculados'>";						
+				echo "<ul>";									
+					while($filFol=mysql_fetch_assoc($resFol))
+					{
+						$cadenaError="El monto para ministrar del ahorrador: <strong>".$filFol["nombreAhorrador"]."</strong> debe ser <strong>$ ".separarMiles($filFol["paraMinistrar"])."</strong> y el archivo indica <strong>$ ".separarMiles($filFol["montoMinistrar"])."</strong> ";
+						echo "<li><span class='error'>".$cadenaError."</span></li>";
+						guardaErrorMinistracion($idministracionesTemporales,$cadenaError);
+						$foliosMalos[]=$filFol["folioIdentificador"];
+					}
+				echo "</ul>";
+			echo "</div>";
+		}
+		// VERIFICO QUE EL MONTO A MINISTRAR SEA EL 70%
+		echo "<br><br>";
+
+
+
+
+
+
+
 
 
 
 
 
 		//REVISO TODOS LOS IMPORTES
-		$camposMinistraciones=Array("parteSocial","cuentasAhorro","cuentasInversion","depositosGarantia","chequesNoCobrados","otrosDepositos","prestamosCargo","saldoTotal","montoMinistrar");
-		$camposAhorrador=Array("sps","sca","sci","sdg","scnc","sod","spc","montoAl100","montoMaximo");
-		$leyendas=Array("Parte social","Cuentas de ahorro","Cuentas de inversión","Depósitos en garantía","Cheques no cobrados","Otros depósitos","Préstamos a cargo","Saldo total","Monto a ministrar");
+		$camposMinistraciones=Array("parteSocial","cuentasAhorro","cuentasInversion","depositosGarantia","chequesNoCobrados","otrosDepositos","prestamosCargo");
+		$camposAhorrador=Array("sps","sca","sci","sdg","scnc","sod","spc");
+		$leyendas=Array("Parte social","Cuentas de ahorro","Cuentas de inversión","Depósitos en garantía","Cheques no cobrados","Otros depósitos","Préstamos a cargo");
 
 		$sqlFol="SELECT * FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND folioIdentificador NOT IN(".implode(",",$foliosMalos).")";
 		$resFol=mysql_query($sqlFol);
 		while($filFol=mysql_fetch_assoc($resFol))
 		{
+			echo "<div class='separador'></div>";
 			echo "Revisando los importes de: <strong>".dameNombreAhorrador($filFol["folioIdentificador"])."</strong><br>";
 			$sqlAhorrador="SELECT * FROM ahorrador WHERE folioIdentificador='".$filFol["folioIdentificador"]."'";
 			$resAhorrador=mysql_query($sqlAhorrador);
@@ -614,26 +724,41 @@
 
 			foreach($camposMinistraciones as $indice => $campoMinistraciones)
 			{
-				echo "Revisando ".$leyendas[$indice]." ";
-				if($filAhorrador[$camposAhorrador[$indice]]==$filFol[$campoMinistraciones])
+				if($filFol[$campoMinistraciones]>0)
 				{
-					echo "<span class='exito'>CORRECTO</span>";
-				}
-				else
-				{
-					$cadenaError="EL MONTO DEBE SER ".$filAhorrador[$camposAhorrador[$indice]]." Y EL ARCHIVO INDICA ".$$filFol[$campoMinistraciones];
-					echo "<span class='error'>".$cadenaError."</span>";
-					guardaErrorMinistracion($idministracionesTemporales,$cadenaError);
-				}
+					echo $leyendas[$indice]." registrado <strong> $ ".separarMiles($filAhorrador[$camposAhorrador[$indice]])."</strong><br>";
+					echo $leyendas[$indice]." indicado <strong> $ ".separarMiles($filFol[$campoMinistraciones])."</strong><br>";
+					//if(($filAhorrador[$camposAhorrador[$indice]]>=$filFol[$campoMinistraciones] && $campoMinistraciones!="montoMinistrar") || ($filAhorrador[$camposAhorrador[$indice]]<=$filFol[$campoMinistraciones] && $campoMinistraciones=="montoMinistrar"))
+					if($filAhorrador[$camposAhorrador[$indice]]>=$filFol[$campoMinistraciones] )
+					{
+						echo "<span class='exito'>CORRECTO</span>";
+					}
+					else
+					{
+						$cadenaError="EL MONTO EN ".strtoupper($leyendas[$indice])." DEBE SER $ ".separarMiles($filAhorrador[$camposAhorrador[$indice]])." Y EL ARCHIVO INDICA $ ".separarMiles($filFol[$campoMinistraciones]);
+						echo "<span class='error'>".$cadenaError."</span>";
+						guardaErrorMinistracion($idministracionesTemporales,$cadenaError);
+					}
 
-				echo "<br>";
+					echo "<br><br>";
+				}
 			}
 
+			//VALIDO QUE NO SE PIDA MÁS DE LO QUE ES SU MONTO MÁXIMO DE PAGO
+			if($filFol["montoMinistrar"]>$filAhorrador["montoMaximo"])
+			{
+				$cadenaError="EL MONTO PARA MINISTRAR MÁXIMO DEBE SER $ ".separarMiles($filAhorrador["montoMaximo"])." Y EL ARCHIVO INDICA $ ".separarMiles($filFol["montoMinistrar"]);
+				echo "<span class='error'>".$cadenaError."</span>";
+				guardaErrorMinistracion($idministracionesTemporales,$cadenaError);
+			}
 
 			echo "<br><br>";
 		}
-		
 		echo "<br><br>";
+		//REVISO TODOS LOS IMPORTES
+
+
+
 
 
 
@@ -681,15 +806,122 @@ function aprobarMinistracion()
 	$resMin=mysql_query($sqlMin);
 
 	echo "LA MINISTRACIÓN HA SIDO MARCADA COMO ACEPTADA";
+	echo "<br><br>";
 	?>
-	<input type="button" value="Continuar" class="botonRojoChico" onclick="cargaModulo('mins')">
+	<form action="" method="post">
+		Al dar click en <strong>Continuar</strong> se se harán las modificaciones al convenio y al padrón de ahorradores correspondientes a esta ministración
+		<br><br>
+		<input type="button" value="Cancelar" class="botonRojoChico"  onclick="cargaModulo('mins')">
+		&nbsp;&nbsp;&nbsp;
+		<input type="submit" value="Continuar" class="botonRojoChico" >
+		<input type="hidden" name="a" value="comienzaActualizaciones" />
+		<?php echo "<input type='hidden' name='idministracionesTemporales' value='".$idministracionesTemporales."'>"; ?>
+		<br><br>
+	</form>
 	<?php
 
 }
 
 
 
+function comienzaActualizaciones()
+{
+	global $_REQUEST;
 
+	$erroresMinistraciones=0;
+	$idministracionesTemporales=$_REQUEST["idministracionesTemporales"];
+	$totalMinistracion=0;
+
+	$sql="SELECT * FROM ministracionesTemporales WHERE idministracionesTemporales='".$idministracionesTemporales."'";
+	$res=mysql_query($sql);
+	$ministracionTemporal=mysql_fetch_assoc($res);
+
+	$sql="SELECT * FROM convenio WHERE idconvenio='".$ministracionTemporal["convenio_idconvenio"]."'";
+	$res=mysql_query($sql);
+	$convenio=mysql_fetch_assoc($res);
+
+	$sql="SELECT * FROM estado WHERE idestado='".$convenio["estado_idestado"]."'";
+	$res=mysql_query($sql);
+	$estado=mysql_fetch_assoc($res);	
+
+
+	$sql="SELECT * FROM sociedad INNER JOIN convenio_has_sociedad ON sociedad_idsociedad=idsociedad WHERE convenio_idconvenio='".$convenio["idconvenio"]."'";
+	$res=mysql_query($sql);
+	while($fil=mysql_fetch_assoc($res))
+	{
+		$sociedades[]=$fil;
+	}
+
+
+
+	//REVISO TODOS LOS IMPORTES
+	$camposMinistraciones=Array("parteSocial","cuentasAhorro","cuentasInversion","depositosGarantia","chequesNoCobrados","otrosDepositos","prestamosCargo");
+	$rubrosTablas=Array("ahorradorParteSocial","ahorradorCuentasAhorro","ahorradorCuentasInversion","ahorradorDepositosGarantia","ahorradorChequesNoCobrados","ahorradorOtrosDepositos","ahorradorPrestamosCargo");
+	$camposAhorrador=Array("sps","sca","sci","sdg","scnc","sod","spc");
+	$leyendas=Array("Parte social","Cuentas de ahorro","Cuentas de inversión","Depósitos en garantía","Cheques no cobrados","Otros depósitos","Préstamos a cargo");
+
+	$sqlFol="SELECT * FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."'";
+	$resFol=mysql_query($sqlFol);
+	while($filFol=mysql_fetch_assoc($resFol))
+	{
+		echo "<div class='separador'></div>";
+		echo "Guardando la ministración de: <strong>".dameNombreAhorrador($filFol["folioIdentificador"])."</strong><br>";
+		
+		$solicitudMinistradoAhorrador=0;
+		$sqlAhorrador="SELECT * FROM ahorrador WHERE folioIdentificador='".$filFol["folioIdentificador"]."'";
+		$resAhorrador=mysql_query($sqlAhorrador);
+		$filAhorrador=mysql_fetch_assoc($resAhorrador);
+
+		$saldoAnterior=dameSaldoParaMinistrarAhorrador($filAhorrador["folioIdentificador"]);
+				
+		$sqlSave="INSERT INTO ahorradoresMinistrados (montoMinistrado, ahorrador_idahorrador, registrosMinistraciones_idregistrosMinistraciones ) VALUES ('".$filFol["montoMinistrar"]."', '".$filAhorrador["idahorrador"]."', '".$filFol["idregistrosMinistraciones"]."')";
+		$resSave=mysql_query($sqlSave);
+		$solicitudMinistradoAhorrador+=$filFol["montoMinistrar"];
+				
+		echo "<br><br>";
+		//RESUMEN DEL AHORRADOR
+		echo "SALDO ANTERIOR DEL AHORADOR: $ ".separarMiles($saldoAnterior)."<br>";
+		echo "SOLICITUD DE LO MINISTRADO: $ ".separarMiles($solicitudMinistradoAhorrador)."<br>";
+		echo "SALDO ACTUAL DEL AHORADOR: $ ".separarMiles(dameSaldoParaMinistrarAhorrador($filAhorrador["folioIdentificador"]))."<br>";
+		echo "<br><br>";
+
+		$totalMinistracion+=$solicitudMinistradoAhorrador;
+	}
+	//REVISO TODOS LOS IMPORTES
+
+	echo "<div class='separador'></div>";
+	echo "<br><br>";
+	//RESUMEN FINAL DE LA MINISTRACION
+	echo "<strong>";
+	echo "TOTAL DE LA MINISTRACIÓN: $ ".separarMiles($totalMinistracion)."<br>";
+	echo "APORTACIÓN ESTATAL: $ ".separarMiles(round($totalMinistracion/2.75),2)."<br>";
+	echo "APORTACIÓN FEDERAL: $ ".separarMiles(round($totalMinistracion*1.75/2.75),2)."<br>";
+	echo "<div class='separador'></div>";
+	echo "LOTE: ".$ministracionTemporal["lote"]."<br>";
+	echo "ESTADO: ".$estado["nombre"]."<br>";
+	echo "CONVENIO: ".$convenio["idconvenio"]." - $ ".separarMiles($convenio["montoTotalConvenio"])."<br>";
+	echo "SOCIEDADES: <ul>";
+	foreach($sociedades as $k => $sociedad)
+	{
+		echo "<li>".$sociedad["clave"]."-".$sociedad["nombre"]."</li>";
+	}
+	echo "</ul>";
+	echo "</strong>";
+
+	echo "<br><br>";
+
+
+	
+	
+	$sqlMin="UPDATE ministracionesTemporales SET statusMinistracion_idstatusMinistracion=4 WHERE idministracionesTemporales=".$idministracionesTemporales;
+	$resMin=mysql_query($sqlMin);
+	echo "<br><br>";
+	?>
+	<input type="button" value="Continuar" class="botonRojoChico" onclick="cargaModulo('mins')">
+	<br><br>
+	<?php
+
+}
 
 	
 
@@ -714,6 +946,84 @@ function muestraResumenReporte()
 		muestraErroresMinistracion($idministracionesTemporales);			
 	echo "</div>";
 	echo "<br><br>";
+
+
+	$sql="SELECT * FROM ministracionesTemporales WHERE idministracionesTemporales='".$idministracionesTemporales."'";
+	$res=mysql_query($sql);
+	$ministracionTemporal=mysql_fetch_assoc($res);
+
+	if($ministracionTemporal["statusMinistracion_idstatusMinistracion"]==4) //Una ministracion ejectuada
+	{
+
+
+		$sql="SELECT * FROM convenio WHERE idconvenio='".$ministracionTemporal["convenio_idconvenio"]."'";
+		$res=mysql_query($sql);
+		$convenio=mysql_fetch_assoc($res);
+
+		$sql="SELECT * FROM estado WHERE idestado='".$convenio["estado_idestado"]."'";
+		$res=mysql_query($sql);
+		$estado=mysql_fetch_assoc($res);	
+
+
+		$sql="SELECT * FROM sociedad INNER JOIN convenio_has_sociedad ON sociedad_idsociedad=idsociedad WHERE convenio_idconvenio='".$convenio["idconvenio"]."'";
+		$res=mysql_query($sql);
+		while($fil=mysql_fetch_assoc($res))
+		{
+			$sociedades[]=$fil;
+		}
+
+
+
+		//REVISO TODOS LOS IMPORTES
+		$camposMinistraciones=Array("parteSocial","cuentasAhorro","cuentasInversion","depositosGarantia","chequesNoCobrados","otrosDepositos","prestamosCargo");
+		$rubrosTablas=Array("ahorradorParteSocial","ahorradorCuentasAhorro","ahorradorCuentasInversion","ahorradorDepositosGarantia","ahorradorChequesNoCobrados","ahorradorOtrosDepositos","ahorradorPrestamosCargo");
+		$camposAhorrador=Array("sps","sca","sci","sdg","scnc","sod","spc");
+		$leyendas=Array("Parte social","Cuentas de ahorro","Cuentas de inversión","Depósitos en garantía","Cheques no cobrados","Otros depósitos","Préstamos a cargo");
+
+		$sqlFol="SELECT * FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."'";
+		$resFol=mysql_query($sqlFol);
+		while($filFol=mysql_fetch_assoc($resFol))
+		{
+			echo "<div class='separador'></div>";
+			echo "Se ministró al ahorrador: <strong>".dameNombreAhorrador($filFol["folioIdentificador"])."</strong><br>";
+			
+			$solicitudMinistradoAhorrador=0;
+			$sqlAhorrador="SELECT * FROM ahorrador WHERE folioIdentificador='".$filFol["folioIdentificador"]."'";
+			$resAhorrador=mysql_query($sqlAhorrador);
+			$filAhorrador=mysql_fetch_assoc($resAhorrador);
+
+			$solicitudMinistradoAhorrador+=$filFol["montoMinistrar"];
+					
+			//RESUMEN DEL AHORRADOR
+			echo "SOLICITUD DE LO MINISTRADO: $ ".separarMiles($solicitudMinistradoAhorrador)."<br>";
+			echo "<br><br>";
+
+			$totalMinistracion+=$solicitudMinistradoAhorrador;
+		}
+		//REVISO TODOS LOS IMPORTES
+
+
+		echo "<div class='separador'></div>";
+		echo "<br><br>";
+		//RESUMEN FINAL DE LA MINISTRACION
+		echo "<strong>";
+		echo "TOTAL DE LA MINISTRACIÓN: $ ".separarMiles($totalMinistracion)."<br>";
+		echo "APORTACIÓN ESTATAL: $ ".separarMiles(round($totalMinistracion/2.75),2)."<br>";
+		echo "APORTACIÓN FEDERAL: $ ".separarMiles(round($totalMinistracion*1.75/2.75),2)."<br>";
+		echo "<div class='separador'></div>";
+		echo "LOTE: ".$ministracionTemporal["lote"]."<br>";
+		echo "ESTADO: ".$estado["nombre"]."<br>";
+		echo "CONVENIO: ".$convenio["idconvenio"]." - $ ".separarMiles($convenio["montoTotalConvenio"])."<br>";
+		echo "SOCIEDADES: <ul>";
+		foreach($sociedades as $k => $sociedad)
+		{
+			echo "<li>".$sociedad["clave"]."-".$sociedad["nombre"]."</li>";
+		}
+		echo "</ul>";
+		echo "</strong>";
+
+		echo "<br><br>";
+	}
 
 	
 	?>
