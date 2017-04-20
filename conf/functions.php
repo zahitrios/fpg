@@ -1643,6 +1643,16 @@
 		return $fil["nombre"];
 	}
 
+	function dameStatusConvenio($idConvenio)
+	{
+		$sql="SELECT descripcion FROM statusConvenio INNER JOIN convenio ON statusConvenio_idstatusConvenio=idstatusConvenio WHERE convenio.idconvenio='".$idConvenio."'";
+		
+		$res=mysql_query($sql);
+		$fil=mysql_fetch_assoc($res);
+
+		return $fil["descripcion"];
+	}
+
 	function dameSociedadDelAhorradorRevision($idconsolidadasTemporales)
 	{
 		$sql="SELECT nombreAhorrador,revisionesTemporales_idrevisionesTemporales FROM consolidadasTemporales WHERE idconsolidadasTemporales='".$idconsolidadasTemporales."'";
@@ -1925,6 +1935,7 @@
 		$montoOriginalParaMinistrar=$filAhorrador["montoMaximo"];
 
 		$sqlMinistrado="SELECT SUM(montoMinistrado) AS total FROM ahorradoresMinistrados WHERE ahorrador_idahorrador='".$filAhorrador["idahorrador"]."'";
+
 		$resMinistrado=mysql_query($sqlMinistrado);
 		if(mysql_num_rows($resMinistrado)>0)
 		{
@@ -1942,7 +1953,7 @@
 	{
 		foreach($fila as $indice => $valor)
 		{
-			if($valor!=0 && $valor!="")
+			if($valor!=0 || $valor!="")
 				return false;
 		}
 

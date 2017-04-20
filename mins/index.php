@@ -147,7 +147,16 @@
 		$link=conectDBReturn();
 		$ds = new MySQLDataSource($link);
 		
-		$ds->SelectCommand = "SELECT ministracionesTemporales.*, statusMinistracion.descripcion FROM ministracionesTemporales INNER JOIN statusMinistracion ON idstatusMinistracion=statusMinistracion_idstatusMinistracion ORDER BY fecha DESC ";
+		$ds->SelectCommand = "SELECT 
+							ministracionesTemporales.*, 
+							statusMinistracion.descripcion,
+							estado.nombre 
+							FROM 
+							ministracionesTemporales 
+							INNER JOIN statusMinistracion ON idstatusMinistracion=statusMinistracion_idstatusMinistracion 
+							INNER JOIN convenio ON idconvenio=convenio_idconvenio  
+							INNER JOIN estado ON idestado=estado_idestado  
+							ORDER BY fecha DESC ";
 
 		$grid = new KoolGrid("grid");
 
@@ -173,6 +182,16 @@
 		$column->ReadOnly=true;		
 		$grid->MasterTable->AddColumn($column);
 
+
+
+
+		$column = new GridBoundColumn();
+		$column->HeaderText = "Convenio";
+		$column->DataField = "convenio_idconvenio";		
+		$grid->MasterTable->AddColumn($column);		
+
+
+
 		$column = new GridDateTimeColumn();
 		$column->HeaderText = "Fecha";
 		$column->DataField = "fecha";	
@@ -185,9 +204,10 @@
 
 		
 		$column = new GridBoundColumn();
-		$column->HeaderText = "Convenio";
-		$column->DataField = "convenio_idconvenio";		
-		$grid->MasterTable->AddColumn($column);		
+		$column->HeaderText = "Estado";
+		$column->DataField = "nombre";		
+		$grid->MasterTable->AddColumn($column);	
+		
 
 
 		$column = new GridBoundColumn();
@@ -515,8 +535,8 @@
 		if($lote!=$loteDeberia)
 		{
 			$cadenaError="El lote correspondiente para la ministración debe ser <strong>".$loteDeberia."</strong> y el archivo dice <strong>".$lote."</strong>";
-			echo $cadenaError."<br>";
-			guardaErrorRevisionMinistracion($idministracionesTemporales,$cadenaError);			
+			echo "<span class='error'>".$cadenaError."</span><br>";
+			guardaErrorMinistracion($idministracionesTemporales,$cadenaError);			
 		}
 		echo "<br>";
 
@@ -649,7 +669,7 @@
 
 
 		//VERIFICO QUE LAS SUMAS SEAN CORRECTAS
-		$sqlFol="SELECT *,(parteSocial+cuentasAhorro+cuentasInversion+depositosGarantia+chequesNoCobrados+otrosDepositos+prestamosCargo) AS suma FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND folioIdentificador NOT IN(".implode(",",$foliosMalos).") AND (parteSocial+cuentasAhorro+cuentasInversion+depositosGarantia+chequesNoCobrados+otrosDepositos+prestamosCargo) <> saldoTotal"; 
+		$sqlFol="SELECT *,ROUND((parteSocial+cuentasAhorro+cuentasInversion+depositosGarantia+chequesNoCobrados+otrosDepositos+prestamosCargo),2) AS suma FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND folioIdentificador NOT IN(".implode(",",$foliosMalos).") AND ROUND((parteSocial+cuentasAhorro+cuentasInversion+depositosGarantia+chequesNoCobrados+otrosDepositos+prestamosCargo),2) <> saldoTotal"; 
 		$resFol=mysql_query($sqlFol);
 		echo "Montos mal calculados por ahorrador: <strong>".mysql_num_rows($resFol)."</strong>";
 		if(mysql_num_rows($resFol)>0)

@@ -95,7 +95,7 @@
 		$link=conectDBReturn();
 
 		$ds = new MySQLDataSource($link);		
-		$ds->SelectCommand = "SELECT folioIdentificador,nombre,montoAl100,montoAl70,montoMaximo,baja FROM ahorrador ORDER BY folioIdentificador";
+		$ds->SelectCommand = "SELECT folioIdentificador,nombre,montoAl100,montoAl70,montoMaximo,baja,montoMinistrado FROM ahorrador LEFT JOIN ahorradoresMinistrados ON idahorrador=ahorrador_idahorrador ORDER BY folioIdentificador";
 
 
 		$dsDetalle = new MySQLDataSource($link);
@@ -225,8 +225,9 @@
 		$column->DataField = "montoAl70";
 		$column->Width = "150px";	
 		$column->AllowSorting = true;
-
 		$grid->MasterTable->AddColumn($column);
+
+
 
 		$column = new GridCurrencyColumn();
 		$column->Locale = "es_MX";
@@ -236,6 +237,25 @@
 		$column->Width = "150px";	
 		$column->AllowSorting = true;
 		$grid->MasterTable->AddColumn($column);
+
+
+
+
+
+		$column = new GridCurrencyColumn();
+		$column->Locale = "es_MX";
+		$column->FormatString = "%n";
+		$column->HeaderText = "Monto ministrado";
+		$column->DataField = "montoMinistrado";
+		$column->Width = "150px";	
+		$column->AllowSorting = true;
+		$grid->MasterTable->AddColumn($column);
+
+
+
+
+
+
 
 
 		class MyGridEventHandler extends GridEventHandler

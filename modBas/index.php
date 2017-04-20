@@ -822,7 +822,8 @@
 						while($fil=mysql_fetch_assoc($res))
 						{
 							$nombreEstado=dameNombreEstadoConvenio($fil["idconvenio"]);
-							echo "<option value='".$fil['idconvenio']."'>".$fil["idconvenio"]." - ".$nombreEstado."</option>";
+							$statusConvenio=dameStatusConvenio($fil["idconvenio"]);
+							echo "<option value='".$fil['idconvenio']."'>".$fil["idconvenio"]." - ".$nombreEstado." - ".$statusConvenio."</option>";
 						}
 					echo "</select>";
 
@@ -1792,6 +1793,7 @@
 				$updateArray[]="sod='".$filMod["otrosDepositosDebeDecir"]."'";
 				$updateArray[]="spc='".$filMod["prestamosACargoDebeDecir"]."'";
 				$updateArray[]="montoAl100='".$filMod["saldoNeto100DebeDecir"]."'";
+				$updateArray[]="montoAl70='".$filMod["saldoNeto70DebeDecir"]."'";
 				$updateArray[]="montoMaximo='".$filMod["montoMaximoPagoDebeDecir"]."'";
 
 				$update.=implode(",",$updateArray);

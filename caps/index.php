@@ -17,9 +17,9 @@
   $link=conectDBReturn();
   $ds = new MySQLDataSource($link);
   
-  $ds->SelectCommand = "SELECT * FROM capacitacion";
+  $ds->SelectCommand = "SELECT * FROM capacitacion INNER JOIN convenio ON idconvenio=convenio_idconvenio INNER JOIN estado ON idestado=estado_idestado";
 
-  $ds->UpdateCommand = "UPDATE capacitacion SET fechaInicio='@fechaInicio', fechaFinalizacion='@fechaFinalizacion', sede='@sede', capacitadores='@capacitadores', noAsistentes='@noAsistentes', convenio_idconvenio='@convenio_idconvenio' WHERE idcapacitacion=@idcapacitacion";
+  $ds->UpdateCommand = "UPDATE capacitacion SET fechaInicio='@fechaInicio', fechaFinalizacion='@fechaFinalizacion', sede='@sede', capacitadores='@capacitadores', noAsistentes='@noAsistentes' WHERE idcapacitacion=@idcapacitacion";
   // $ds->DeleteCommand = "DELETE FROM capacitacion WHERE idcapacitacion=@idcapacitacion";
 
   $ds->InsertCommand = "INSERT INTO capacitacion (fechaInicio,fechaFinalizacion,sede,capacitadores,noAsistentes,convenio_idconvenio) VALUES ('@fechaInicio','@fechaFinalizacion','@sede','@capacitadores','@noAsistentes','@convenio_idconvenio')";
@@ -51,13 +51,15 @@
 
       $fechaInicio = new KoolDatePicker("fechaInicio"); //Create calendar object
       $fechaInicio->scriptFolder = $KoolControlsFolder."/KoolCalendar";//Set scriptFolder
-      $fechaInicio->styleFolder="default";             
+      $fechaInicio->styleFolder="default";  
+      $fechaInicio->DateFormat="Y/m/d";
       $fechaInicio->Init();
 
 
       $fechaFinalizacion = new KoolDatePicker("fechaFinalizacion"); //Create calendar object
       $fechaFinalizacion->scriptFolder = $KoolControlsFolder."/KoolCalendar";//Set scriptFolder
-      $fechaFinalizacion->styleFolder="default";             
+      $fechaFinalizacion->styleFolder="default"; 
+      $fechaFinalizacion->DateFormat="Y/m/d";  
       $fechaFinalizacion->Init();
 
 
@@ -87,9 +89,9 @@
                   
                   <tr>
                     <td align="right">Fecha de inicio:</td>
-                    <td align="left" style="padding-left:10px;">
-                    '.$fechaInicio->Render().'
-                    </td>
+                    <td align="left" style="padding-left:10px;">';
+                    $html.= $fechaInicio->Render();
+                  $html.='</td>
                   </tr>
 
 
@@ -97,9 +99,9 @@
 
                   <tr>
                     <td align="right">Fecha de fin:</td>
-                    <td align="left" style="padding-left:10px;">
-                    '.$fechaFinalizacion->Render().'
-                    </td>
+                    <td align="left" style="padding-left:10px;">';
+                      $html.=$fechaFinalizacion->Render();
+                  $html.='</td>
                   </tr>
 
                   <tr>
@@ -148,16 +150,16 @@
       $html .='<div style="clear:both;"></div>';
       return $html;
     }
+
     function GetData($_row)
     {
-
         $fechaInicio=$_POST["fechaInicio"];
         $fechaInicio=explode("/",$fechaInicio);
-        $fechaInicio=$fechaInicio[2]."-".$fechaInicio[1]."-".$fechaInicio[0];
+        $fechaInicio=$fechaInicio[0]."-".$fechaInicio[1]."-".$fechaInicio[2];
 
         $fechaFinalizacion=$_POST["fechaFinalizacion"];
         $fechaFinalizacionP=explode("/",$fechaFinalizacion);
-        $fechaFinalizacion=$fechaFinalizacionP[2]."-".$fechaFinalizacionP[1]."-".$fechaFinalizacionP[0];
+        $fechaFinalizacion=$fechaFinalizacionP[0]."-".$fechaFinalizacionP[1]."-".$fechaFinalizacionP[2];
 
         return array("convenio_idconvenio"=>$_POST["convenio_idconvenio"],"fechaInicio"=>$fechaInicio,"fechaFinalizacion"=>$fechaFinalizacion,"sede"=>$_POST["sede"],"capacitadores"=>$_POST["capacitadores"],"noAsistentes"=>$_POST["noAsistentes"]);
     }   
@@ -191,6 +193,14 @@
     foreach($todos as $indice => $registro)
       $column->AddItem($registro["idconvenio"],$registro["idconvenio"]);
   }
+  $column->ReadOnly = true;
+  $grid->MasterTable->AddColumn($column);
+
+
+  $column = new GridBoundColumn();
+  $column->HeaderText = "Estado";
+  $column->DataField = "nombre";
+  $column->ReadOnly = true;
   $grid->MasterTable->AddColumn($column);
 
 
@@ -198,7 +208,7 @@
   $datepicker = new KoolDatePicker("datepicker"); //Create calendar object
   $datepicker->scriptFolder = $KoolControlsFolder."/KoolCalendar";//Set scriptFolder
   $datepicker->styleFolder="default";
-  $datepicker->DateFormat="m/d/Y";
+  $datepicker->DateFormat="d/m/Y";
   $datepicker->CalendarSettings->FocusedDate=mktime(0,0,0,1,1,2009);// Set focused date in 12/15/2009
   $datepicker->Value = "1/1/2009 00:00:00";
   $datepicker->CalendarSettings->ShowToday=true;//Not show today
@@ -215,8 +225,19 @@
 
 
 
+
+
+  $datepicker2 = new KoolDatePicker("datepicker"); //Create calendar object
+  $datepicker2->scriptFolder = $KoolControlsFolder."/KoolCalendar";//Set scriptFolder
+  $datepicker2->styleFolder="default";
+  $datepicker2->DateFormat="d/m/Y";
+  $datepicker2->CalendarSettings->FocusedDate=mktime(0,0,0,1,1,2009);// Set focused date in 12/15/2009
+  $datepicker2->Value = "1/1/2009 00:00:00";
+  $datepicker2->CalendarSettings->ShowToday=true;//Not show today
+  $datepicker2->Init();
+
   $column = new GridDateTimeColumn();
-  $column->Picker = $datepicker;
+  $column->Picker = $datepicker2;
   $column->HeaderText = "Fecha de Finalización";
   $column->DataField = "fechaFinalizacion";
   //$column->Picker->DateFormat = "M d, Y";

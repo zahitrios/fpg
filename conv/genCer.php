@@ -80,14 +80,9 @@
 				$writer->addRow($fila); 
 			}
 
-
 			//Pongo la cabecera de la consolidada
 			$fila=Array("NUEVO FOLIO IDENTIFICADOR","FOLIO IDENTIFICADOR ANTERIOR","NOMBRE DEL AHORRADOR","CURP","PARTE SOCIAL","CUENTAS DE AHORRO","CUENTAS DE INVERSIÓN","DEPÓSITOS EN GARANTÍA","CHEQUES NO COBRADOS","OTROS DEPÓSITOS","PRÉSTAMOS A CARGO","SALDO NETO DE AHORRO 100 %","SALDO NETO DE AHORRO 70 %","MONTO MÁXIMO DE PAGO","CALLE Y NÚMERO","COLONIA","DELEGACIÓN O MUNICIPIO","TELÉFONO");
 			$writer->addRow($fila); 
-
-
-
-
 		}
 
 
@@ -252,14 +247,25 @@
 		}
 
 		$fila="";
+		$filAux=$fil;
 		foreach($fil as $campo => $valor)
 		{
 			if($campo!="hojaDocumentoOriginal" && $campo!="filaDocumentoOriginal")
-				$fila[]=$valor;
+			{
+				
+				if(strrpos(strtoupper($filAux["noAhorradores"]),"MENORES")===false &&  strrpos(strtoupper($filAux["noAhorradores"]),"MAYORES")===false )
+					$fila[]=$valor;
+
+				else if($valor!="0")
+				{
+					$fila[]=$valor;
+				}
+
+			}
 		}
 
 		if(filaEnCeros($fila)==false)
-			$writer->addRow($fila); 
+		 	$writer->addRow($fila); 
 		
 
 		$contador++;
@@ -288,7 +294,7 @@
 
 
 
-	$writer->close();
+	 $writer->close();
 
 
 
