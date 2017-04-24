@@ -23,8 +23,7 @@ body
 	top:0;
 	left:0;
 	position:fixed;
-
-	
+	overflow:auto;	
 	background: #ffffff;
 	background: -moz-linear-gradient(top,  #ffffff 50%, #cccccc 100%);
 	background: -webkit-linear-gradient(top,  #ffffff 50%,#cccccc 100%);

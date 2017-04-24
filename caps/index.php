@@ -17,7 +17,8 @@
   $link=conectDBReturn();
   $ds = new MySQLDataSource($link);
   
-  $ds->SelectCommand = "SELECT * FROM capacitacion INNER JOIN convenio ON idconvenio=convenio_idconvenio INNER JOIN estado ON idestado=estado_idestado";
+  $ds->SelectCommand = "SELECT *,CONCAT(estado.nombre,' - ',DATE_FORMAT(convenio.fechaFirma,'%c %b, %Y')) AS descripcionConvenio  FROM capacitacion 
+                    INNER JOIN convenio ON idconvenio=convenio_idconvenio INNER JOIN estado ON idestado=estado_idestado";
 
   $ds->UpdateCommand = "UPDATE capacitacion SET fechaInicio='@fechaInicio', fechaFinalizacion='@fechaFinalizacion', sede='@sede', capacitadores='@capacitadores', noAsistentes='@noAsistentes' WHERE idcapacitacion=@idcapacitacion";
   // $ds->DeleteCommand = "DELETE FROM capacitacion WHERE idcapacitacion=@idcapacitacion";
@@ -178,31 +179,11 @@
   $grid->MasterTable->AddColumn($column);
 
 
-
-
-  $column = new GridDropDownColumn();
-  $column->HeaderText = "Convenio";
-  $column->DataField = "convenio_idconvenio";
-  $todos=dameGridTable("convenio","idconvenio");
-  if (empty($todos)) 
-  {
-    $column->AddItem("No hay convenios", "");
-  } 
-  else 
-  {
-    foreach($todos as $indice => $registro)
-      $column->AddItem($registro["idconvenio"],$registro["idconvenio"]);
-  }
-  $column->ReadOnly = true;
-  $grid->MasterTable->AddColumn($column);
-
-
   $column = new GridBoundColumn();
-  $column->HeaderText = "Estado";
-  $column->DataField = "nombre";
+  $column->HeaderText = "Convenio";
+  $column->DataField = "descripcionConvenio";
   $column->ReadOnly = true;
   $grid->MasterTable->AddColumn($column);
-
 
 
   $datepicker = new KoolDatePicker("datepicker"); //Create calendar object

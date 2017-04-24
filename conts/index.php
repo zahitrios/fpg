@@ -8,7 +8,7 @@
 	$mensaje="";
 
 	$idusuarios=dameIdUserMd5($_SESSION["i"]); 		
-	if(usuarioTieneModulo($idusuarios,16)===false)//Valido que el usuario tenga el modulo de ministrasciones
+	if(usuarioTieneModulo($idusuarios,18)===false)//Valido que el usuario tenga el modulo de contenedores
 	{
 		echo "SU USUARIO NO PUEDE REALIZAR ESTA ACCION";
 		die;
@@ -18,7 +18,7 @@
 
 <html>
 	<head>
-		<title>FIPAGO - Ministraciones</title>
+		<title>FIPAGO - Contenedores</title>
 		<meta charset="UTF-8">
 		<link href="https://fonts.googleapis.com/css?family=Raleway:300,400,700" rel="stylesheet">
 		
@@ -58,7 +58,7 @@
 
 		<div id="containerPrincipal">
 
-			<div class='titulos'>Ministraciones</div>
+			<div class='titulos'>Contenedores</div>
 			<div class='usuarioLogueado'><?php echo nombreUsuarioLogeado(); ?></div>
 			<div style="clear:both;"></div>	
 
@@ -120,16 +120,17 @@
 		$res=mysql_query($sql);
 		while($fil=mysql_fetch_assoc($res))
 		{
-			$sqlE="SELECT COUNT(*) AS total FROM erroresMinistracionesTemporales WHERE ministracionesTemporales_idmodificacionesTemporales='".$fil["idministracionesTemporales"]."'";
+			$sqlE="SELECT COUNT(*) AS total FROM erroresContenedoresTemporales WHERE contenedoresTemporales_idcontenedoresTemporales='".$fil["idcontenedoresTemporales"]."'";
 			$resE=mysql_query($sqlE);
 			$filE=mysql_fetch_assoc($resE);
 
 			$totalErrores=$filE["total"];
 
-			$sqlU="UPDATE ministracionesTemporales SET totalErrores='".$totalErrores."' WHERE idministracionesTemporales='".$fil["idministracionesTemporales"]."'";
+			$sqlU="UPDATE contenedoresTemporales SET totalErrores='".$totalErrores."' WHERE idcontenedoresTemporales='".$fil["idcontenedoresTemporales"]."'";
 			$resU=mysql_query($sqlU);
 		}
 	}
+
 
 
 	function gridRevisiones()
@@ -148,12 +149,12 @@
 		$ds = new MySQLDataSource($link);
 		
 		$ds->SelectCommand = "SELECT 
-							ministracionesTemporales.*, 
-							statusMinistracion.descripcion,							 
+							contenedoresTemporales.*, 
+							statusContenedores.descripcion,							 
 							CONCAT(estado.nombre,' - ',DATE_FORMAT(convenio.fechaFirma,'%c %b, %Y')) AS descripcionConvenio  
 							FROM 
-							ministracionesTemporales 
-							INNER JOIN statusMinistracion ON idstatusMinistracion=statusMinistracion_idstatusMinistracion 
+							contenedoresTemporales 
+							INNER JOIN statusContenedores ON idstatusContenedores=statusContenedores_idstatusContenedores 
 							INNER JOIN convenio ON idconvenio=convenio_idconvenio  
 							INNER JOIN estado ON idestado=estado_idestado  
 							ORDER BY fecha DESC ";
@@ -180,7 +181,7 @@
 		
 		$column = new GridBoundColumn();
 		$column->HeaderText = "Id";
-		$column->DataField = "idministracionesTemporales";
+		$column->DataField = "idcontenedoresTemporales";
 		$column->ReadOnly=true;		
 		$grid->MasterTable->AddColumn($column);
 
@@ -222,7 +223,7 @@
 
 		?>
 		<div class="tablaCentrada">			
-			Revisiones realizadas
+			Contenedores revisados
 			<br><br>
 			<form id="form1" method="post">	
 				<?php 
@@ -235,6 +236,7 @@
 		<?php
 
 	}
+
 
 	function formularioSubida()
 	{
@@ -274,7 +276,7 @@
 	{
 		global $_REQUEST,$mensaje;
 
-		$target_dir = "../minFiles/";
+		$target_dir = "../contFiles/";
 		$target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
 		$uploadOk = 1;
 

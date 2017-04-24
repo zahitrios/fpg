@@ -30,15 +30,30 @@
 		$folioIdentificador=$_REQUEST["fI"];
 
 		// BUSCO EL ID DEL AHORRADOR //
-		$sql="SELECT idahorrador,nombre FROM ahorrador WHERE folioIdentificador='".$folioIdentificador."'";
+		$sql="SELECT idahorrador,nombre,montoAl100,montoAl70,montoMaximo FROM ahorrador WHERE folioIdentificador='".$folioIdentificador."'";
 		$res=mysql_query($sql);
 		$fil=mysql_fetch_assoc($res);
 		$idahorrador=$fil["idahorrador"];
 		$nombre=$fil["nombre"];
+		$montoAl100=$fil["montoAl100"];
+		$montoAl70=$fil["montoAl70"];
+		$montoMaximo=$fil["montoMaximo"];
+
+		$saldoPendiente=round(dameSaldoParaMinistrarAhorrador($folioIdentificador),2);
+		$saldoMinistrado=round($montoMaximo-$saldoPendiente,2);
 
 
 
-		echo "MOSTRANDO DETALLES EN SALDOS DEL AHORRADOR <br><strong>".$nombre."</strong><br>".$folioIdentificador."<br><br>";
+		echo "MOSTRANDO DETALLES EN SALDOS DEL AHORRADOR <br>";
+		echo "<strong>".$nombre."</strong><br>";		
+		echo $folioIdentificador."<br>";
+		echo "Saldo al 100%: $ ".separarMiles($montoAl100)."<br>";
+		echo "Saldo al 70%: $ ".separarMiles($montoAl70)."<br>";
+		echo "Monto máximo de pago: $ ".separarMiles($montoAl70)."<br><br>";
+
+		echo "Saldo ministraddo: $ ".separarMiles($saldoMinistrado)."<br>";
+		echo "Saldo pendiente para ministrar: $ ".separarMiles($saldoPendiente)."<br>";
+		echo "<br><br>";
 
 		// BUSCO LOS DETALLES DEL AHORRADOR //
 		$tablas=Array('ahorradorParteSocial','ahorradorCuentasAhorro','ahorradorCuentasInversion','ahorradorOtrosDepositos','ahorradorDepositosGarantia','ahorradorChequesNoCobrados','ahorradorPrestamosCargo');
