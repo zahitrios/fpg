@@ -497,6 +497,37 @@
 		return true;
 	}
 
+	function validaCabeceraSolicitudContenedores($registros,$cabecera,$debug=1)
+	{
+		$textos=array ("NO. (*)", "FOLIO IDENTIFICADOR", "NOMBRE DEL AHORRADOR", "REPRESENTANTE LEGAL, ALBACEA, HEREDERO O BENEFICIARIO", "IMPORTE DEL EXPEDIENTE", "IMPORTE MINISTRADO");
+		$textos2=array ("NO.", "FOLIO IDENTIFICADOR", "NOMBRE DEL AHORRADOR", "REPRESENTANTE LEGAL O ALBACEA O HEREDERO O BENEFICIARIO", "IMPORTE DEL EXPEDIENTE", "IMPORTE MINISTRADO");
+		
+		$filas=array ($cabecera, $cabecera, $cabecera, $cabecera, $cabecera, $cabecera);
+		
+		$columnas=array (0,1,2,3,4,5);
+		$letras=array ("A", "B", "C", "D", "E", "F");
+		
+		$errores=0;
+
+		foreach ($textos as $indice => $texto)
+		{
+			if(trim(strtoupper($registros[$filas[$indice]][$columnas[$indice]]))!=$textos[$indice] && trim(strtoupper($registros[$filas[$indice]][$columnas[$indice]]))!=$textos2[$indice])
+			{
+				if($errores==0 && $debug==1)
+					echo "<span class='error'>SE ENCONTRARON ERRORES EN LA CABECERA DE LA REVISIÓN DE CONTENEDORES</span><br>";
+				
+				if($debug==1)
+					echo "LA CELDA ".$letras[$indice].($filas[$indice]+1)." ES <strong>".$registros[$filas[$indice]][$columnas[$indice]]."</strong> Y DEBE SER <strong>".$textos[$indice]."</strong> <br>";
+				
+				$errores++;
+			}
+		}
+		if($errores>0)
+			return false;
+		
+		return true;
+	}
+
 
 
 	function imprimeCabeceraModificacionesAnalitica()
@@ -1296,6 +1327,17 @@
 			echo "<br>error: <br>".$sql."<br>".mysql_error();
 	}
 
+	function guardaErrorContenedor($id,$descripcion)
+	{
+		$link="";
+		global $link;
+		
+		$sql="INSERT INTO erroresContenedoresTemporales (contenedoresTemporales_idcontenedoresTemporales,descripcion) VALUES ('".$id."','".$descripcion."')";
+		$res=mysql_query($sql);
+		if(!$res)
+			echo "<br>error: <br>".$sql."<br>".mysql_error();
+	}
+
 
 	function guardaErrorRevisionMinistracion($idministracionesTemporales,$descripcion)
 	{
@@ -1322,6 +1364,26 @@
 		
 		
 		$sql="SELECT COUNT(*) AS total FROM  erroresMinistracionesTemporales WHERE ministracionesTemporales_idmodificacionesTemporales='".$idministracionesTemporales."'";
+		$res=mysql_query($sql);
+		$fil=mysql_fetch_assoc($res);
+		
+		$regresa=$fil["total"];
+		
+		return $regresa;
+	}
+
+
+
+	function dameTotalErroresRevisionContenedores($idcontenedoresTemporales)
+	{
+		$link="";
+		global $link;
+
+		$regresa=0;
+
+		
+		
+		$sql="SELECT COUNT(*) AS total FROM  erroresContenedoresTemporales WHERE contenedoresTemporales_idcontenedoresTemporales='".$idcontenedoresTemporales."'";
 		$res=mysql_query($sql);
 		$fil=mysql_fetch_assoc($res);
 		
@@ -1394,6 +1456,28 @@
 
 	}
 
+
+	function muestraErroresContenedor($idcontenedoresTemporales)
+	{
+
+		$link="";
+		global $link;
+
+		
+		$sql="SELECT * FROM  erroresContenedoresTemporales WHERE contenedoresTemporales_idcontenedoresTemporales='".$idcontenedoresTemporales."'";
+		$res=mysql_query($sql);
+		while($fil=mysql_fetch_assoc($res))
+		{
+			echo $fil["descripcion"];
+			// if($eliminar=1)
+			// {
+			// 	echo "&nbsp;&nbsp;<input class='botonRojoChico' onclick='eliminaError(\"".$fil["iderroresRevisiones"]."\");' type='button' value='Marcar como resuelto'>";
+			// }
+			echo "<br><br>";
+		}
+
+	}
+
 	function imprimeCabeceraSolicitudMinistracion()
 	{
 		echo '
@@ -1413,6 +1497,22 @@
 			    <th>TOTAL (100%)</th>
 			    <th>MONTO A MINISTRAR (70%)</th>
 			  </tr>
+			</table>
+		';
+	}
+
+	function imprimeCabeceraSolicitudContenedores()
+	{
+		echo '
+			<table align="center" border="1" cellpadding="0" cellspacing="0" style="font-size:10px;">
+			 	<tr>
+				    <th>NO.</th>
+				    <th>FOLIO IDENTIFICADOR</th>
+				    <th>NOMBRE DEL AHORRADOR</th>
+				    <th>REPRESENTANTE LEGAL, ALBACEA,HEREDERO O BENEFICIARIO</th>
+				    <th>IMPORTE DEL EXPEDIENTE</th>
+				    <th>IMPORTE MINISTRADO</th>
+			 	</tr>
 			</table>
 		';
 	}

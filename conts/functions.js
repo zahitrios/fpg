@@ -4,10 +4,10 @@ function Handle_OnRowClick(sender,args)
 {
 	var _row = args["Row"];
 	var _event = args["Event"];
-	var idministracionesTemporales=_row.getDataItem()["idministracionesTemporales"];
+	var idcontenedoresTemporales=_row.getDataItem()["idcontenedoresTemporales"];
 	
 
-	location.href='./?a=muestraResumenReporte&idministracionesTemporales='+idministracionesTemporales;
+	location.href='./?a=muestraResumenReporte&idcontenedoresTemporales='+idcontenedoresTemporales;
 
 }
 

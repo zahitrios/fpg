@@ -5,7 +5,7 @@
 	use Box\Spout\Reader\ReaderFactory;
 	use Box\Spout\Common\Type;
 
-	function insertRegistros($idministracionesTemporales,$file,$filaInicial)
+	function insertRegistros($idcontenedoresTemporales,$file,$filaInicial)
 	{
 		$reader = ReaderFactory::create(Type::XLSX); 
 		$reader->open($file);
@@ -29,7 +29,27 @@
 
 			        if(trim($registro[0])!="")
 			        {
-				       	$sqlInsert="INSERT INTO registrosMinistraciones (ministracionesTemporales_idministracionesTemporales, numero, folioIdentificador, nombreAhorrador, representanteAlbacea, parteSocial, cuentasAhorro, cuentasInversion, depositosGarantia, chequesNoCobrados, otrosDepositos, prestamosCargo, saldoTotal, montoMinistrar ) VALUES ('".$idministracionesTemporales."', '".$registro[0]."', '".$registro[1]."', '".$registro[2]."', '".$registro[3]."', '".$registro[4]."', '".$registro[5]."', '".$registro[6]."', '".$registro[7]."', '".$registro[8]."', '".$registro[9]."', '".$registro[10]."', '".$registro[11]."', '".$registro[12]."') "; $resInsert=mysql_query($sqlInsert);
+				       	$sqlInsert="INSERT INTO registrosContenadores 
+				       				(
+				       				numero,
+				       				folioIdentificador,
+				       				nombreAhorrador,
+				       				representanteAlbacea,
+				       				importeExpediente,
+				       				importeMinistrado,
+				       				contenedoresTemporales_idcontenedoresTemporales
+				       				) 
+				       				VALUES 
+				       				(
+				       					'".$registro[0]."',
+					       				'".$registro[1]."',
+					       				'".$registro[2]."',
+					       				'".$registro[3]."',
+					       				'".$registro[4]."',
+					       				'".$registro[5]."',
+					       				'".$idcontenedoresTemporales."' 
+				       				) "; 
+				       	$resInsert=mysql_query($sqlInsert);
 					    if(!$resInsert)
 					    {
 					    	echo "error: <br>".mysql_error()."<br>".$sqlInsert;
@@ -91,20 +111,21 @@
 
 
 
-	function getNumeroLote($file)
+	function getNumeroContenedor($file)
 	{
 		$reader = ReaderFactory::create(Type::XLSX); 
 		$reader->open($file);
 		$indiceRegresa=0;
 		$regresa="";
+		$fila=1;
 
 		foreach ($reader->getSheetIterator() as $sheet) 
 		{	
 			foreach ($sheet->getRowIterator() as $row) 
 		    {	
-	    		if($row[7]!="")
+	    		if(trim(strtoupper($row[4]))=="CONTENEDOR NO.:")
 	    		{
-	    			$regresa=$row[7];
+	    			$regresa=$row[5];
 	    			$reader->close();
 					return $regresa;
 	    		}
@@ -125,20 +146,18 @@
 		$regresa="";
 
 		foreach ($reader->getSheetIterator() as $sheet) 
-		{	
-			$fila=1;
+		{				
 			foreach ($sheet->getRowIterator() as $row) 
 		    {	
-	    		if($fila==4)
-	    		{
-	    			$regresa=$row[3];
+	    		if(trim(strtoupper($row[0]))=="ENTIDAD FEDERATIVA:")
+	    		{	
+	    			$regresa=$row[1];
 	    			$reader->close();
 					return $regresa;
 	    		}
-	    		$fila++;
-		    }
+	    	}
 		}
-
+		
 		$reader->close();
 		return $regresa;
 	}

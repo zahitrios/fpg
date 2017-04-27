@@ -29,7 +29,8 @@
 
 			        if(trim($registro[0])!="")
 			        {
-				       	$sqlInsert="INSERT INTO registrosMinistraciones (ministracionesTemporales_idministracionesTemporales, numero, folioIdentificador, nombreAhorrador, representanteAlbacea, parteSocial, cuentasAhorro, cuentasInversion, depositosGarantia, chequesNoCobrados, otrosDepositos, prestamosCargo, saldoTotal, montoMinistrar ) VALUES ('".$idministracionesTemporales."', '".$registro[0]."', '".$registro[1]."', '".$registro[2]."', '".$registro[3]."', '".$registro[4]."', '".$registro[5]."', '".$registro[6]."', '".$registro[7]."', '".$registro[8]."', '".$registro[9]."', '".$registro[10]."', '".$registro[11]."', '".$registro[12]."') "; $resInsert=mysql_query($sqlInsert);
+				       	$sqlInsert="INSERT INTO registrosMinistraciones (ministracionesTemporales_idministracionesTemporales, numero, folioIdentificador, nombreAhorrador, representanteAlbacea, parteSocial, cuentasAhorro, cuentasInversion, depositosGarantia, chequesNoCobrados, otrosDepositos, prestamosCargo, saldoTotal, montoMinistrar ) VALUES ('".$idministracionesTemporales."', '".$registro[0]."', '".$registro[1]."', '".$registro[2]."', '".$registro[3]."', '".$registro[4]."', '".$registro[5]."', '".$registro[6]."', '".$registro[7]."', '".$registro[8]."', '".$registro[9]."', '".$registro[10]."', '".$registro[11]."', '".$registro[12]."') "; 
+				       	$resInsert=mysql_query($sqlInsert);
 					    if(!$resInsert)
 					    {
 					    	echo "error: <br>".mysql_error()."<br>".$sqlInsert;

@@ -118,12 +118,18 @@ abstract class AbstractReader implements ReaderInterface
             }
         }
 
-        try {
+        try 
+        {
             $fileRealPath = $this->getFileRealPath($filePath);
             $this->openReader($fileRealPath);
             $this->isStreamOpened = true;
-        } catch (\Exception $exception) {
-            throw new IOException("Could not open $filePath for reading! ({$exception->getMessage()})");
+        } 
+        catch (\Exception $exception) 
+        {
+            echo "Could not open $filePath for reading!<br><br>"; 
+
+            throw new IOException($exception->getMessage());
+            echo "<br><br>";
         }
     }
 

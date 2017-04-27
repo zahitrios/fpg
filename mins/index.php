@@ -203,6 +203,22 @@
 		$column->Picker->DateFormat = "d M, Y";
 		$grid->MasterTable->AddColumn($column);
 
+
+		$column = new GridBoundColumn();
+		$column->HeaderText = "Oficio";
+		$column->DataField = "oficio";		
+		$grid->MasterTable->AddColumn($column);	
+
+		$column = new GridDateTimeColumn();
+		$column->HeaderText = "Fecha del oficio";
+		$column->DataField = "fechaOficio";	
+		$column->FormatString = "d M, Y";
+		$column->Picker = new KoolDatePicker();
+		$column->Picker->scriptFolder = $KoolControlsFolder."/KoolCalendar";
+		$column->Picker->styleFolder = "sunset";	
+		$column->Picker->DateFormat = "d M, Y";
+		$grid->MasterTable->AddColumn($column);	
+
 		
 		$column = new GridBoundColumn();
 		$column->HeaderText = "Estatus";
@@ -448,7 +464,7 @@
 			echo "<br>";
 			echo "<span class='error'>NO SE ENCONTRO EN LA COLUMNA <strong>B</strong> 'FOLIO IDENTIFICADOR' PARA INICIAR CON LA REVISIÓN DEL ARCHIVO</span>";
 			echo "<br>";
-			echo "<strong>FORMATO PARA LA LA SOLICITUD DE MINISTRACIONES</strong>";
+			echo "<strong>FORMATO PARA LA SOLICITUD DE MINISTRACIONES</strong>";
 			echo "<br>";
 			imprimeCabeceraSolicitudMinistracion();
 			echo "<br><br>";	
@@ -457,7 +473,7 @@
 		{
 			$erroresCabeceras++;
 			echo "<br>";
-			echo "<strong>FORMATO PARA LA LA SOLICITUD DE MINISTRACIONES</strong>";
+			echo "<strong>FORMATO PARA LA SOLICITUD DE MINISTRACIONES</strong>";
 			echo "<br>";
 			imprimeCabeceraSolicitudMinistracion();
 			echo "<br><br>";			
@@ -520,7 +536,8 @@
 
 			$datesSesion = new KoolDatePicker("fechaOficio"); //Create calendar object
 			$datesSesion->scriptFolder = $KoolControlsFolder."/KoolCalendar";//Set scriptFolder
-			$datesSesion->styleFolder="default";						 
+			$datesSesion->styleFolder="default";	
+			$datesSesion->DateFormat="Y/m/d";					 
 			$datesSesion->Init();
 
 			?>	
@@ -564,10 +581,14 @@
 		$file=$_REQUEST["fileD"];
 		$cabecera=$_REQUEST["cabecera"]+2;
 		$totalErrores=0;
+		$oficio=$_REQUEST["oficio"];
+		$fechaOficio=$_REQUEST["fechaOficio"];
+		$fechaOficio=explode("/",$fechaOficio);
+		$fechaOficio=implode("-",$fechaOficio);
 
 
 		//Inserto la revision
-		$sql="INSERT INTO ministracionesTemporales (archivo, convenio_idconvenio, lote) VALUES ('".$file."','".$idConvenio."','".$lote."')";
+		$sql="INSERT INTO ministracionesTemporales (archivo, convenio_idconvenio, lote, oficio, fechaOficio) VALUES ('".$file."','".$idConvenio."','".$lote."','".$oficio."','".$fechaOficio."')";
 		$res=mysql_query($sql);
 		$idministracionesTemporales=mysql_insert_id();
 		guardaLog(dameIdUserMd5($_SESSION["i"]),11,"ministracionesTemporales",$idministracionesTemporales);
@@ -920,7 +941,7 @@ function aprobarMinistracion()
 	echo "<br><br>";
 	?>
 	<form action="" method="post">
-		Al dar click en <strong>Continuar</strong> se se harán las modificaciones al convenio y al padrón de ahorradores correspondientes a esta ministración
+		Al dar click en <strong>Continuar</strong> se harán las modificaciones al convenio y al padrón de ahorradores correspondientes a esta ministración
 		<br><br>
 		<input type="button" value="Cancelar" class="botonRojoChico"  onclick="cargaModulo('mins')">
 		&nbsp;&nbsp;&nbsp;
