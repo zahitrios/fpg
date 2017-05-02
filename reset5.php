@@ -20,6 +20,17 @@
 	$sql[]="TRUNCATE ahorradorChequesNoCobrados";
 	$sql[]="TRUNCATE ahorradorPrestamosCargo";
 
+	$sql[]="TRUNCATE historicoAhorrador";
+	$sql[]="TRUNCATE historicoAhorradorParteSocial";
+	$sql[]="TRUNCATE historicoAhorradorOtrosDepositos";
+	$sql[]="TRUNCATE historicoAhorradorChequesNoCobrados";
+	$sql[]="TRUNCATE historicoAhorradorCuentasInversion";
+	$sql[]="TRUNCATE historicoAhorradorCuentasAhorro";
+	$sql[]="TRUNCATE historicoAhorradorPrestamosCargo";
+	$sql[]="TRUNCATE historicoAhorradorDepositosGarantia";
+
+
+
 	$sql[]="UPDATE convenio SET statusConvenio_idstatusConvenio=1";
 
 

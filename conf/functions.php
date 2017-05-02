@@ -2071,6 +2071,46 @@
 	}
 
 
+
+	function guardaHistoricoAnalitica($ahorradoresAnalitica)
+	{
+		$tablas=Array("ahorradorParteSocial","ahorradorCuentasAhorro","ahorradorCuentasInversion","ahorradorDepositosGarantia","ahorradorChequesNoCobrados","ahorradorOtrosDepositos","ahorradorPrestamosCargo");
+		$tablasHistoricosAnalitica=Array("historicoAhorradorParteSocial","historicoAhorradorCuentasAhorro","historicoAhorradorCuentasInversion","historicoAhorradorDepositosGarantia","historicoAhorradorChequesNoCobrados","historicoAhorradorOtrosDepositos","historicoAhorradorPrestamosCargo");
+		$idTablas=Array("idahorradorParteSocial","idahorradorCuentasAhorro","idahorradorCuentasInversion","idahorradorDepositosGarantia","idahorradorChequesNoCobrados","idahorradorOtrosDepositos","idahorradorPrestamosCargo");
+
+		foreach($ahorradoresAnalitica as $k => $v)
+		{
+			$folioIdentificador=$k;
+			$idahorrador=dameIdAhorrador($folioIdentificador);
+
+			//Recorro todas las tablas del ahorrador
+			foreach($tablas as $indice => $tabla)
+			{
+				$tablaHistorica=$tablasHistoricosAnalitica[$indice];
+				$idTabla=$idTablas[$indice];
+
+				$sql1="SELECT * FROM ".$tabla." WHERE ahorrador_idahorrador='".$idahorrador."'";
+				$res1=mysql_query($sql1);
+				if(mysql_num_rows($res1)>0)
+				{
+					while($fil1=mysql_fetch_assoc($res1))
+					{
+						$sql2="INSERT INTO ".$tablaHistorica." (tipoDocumento, folio, importe, ahorrador_idahorrador) VALUES ('".$fil1["tipoDocumento"]."','".$fil1["folio"]."','".$fil1["importe"]."','".$fil1["ahorrador_idahorrador"]."')";
+						$res2=mysql_query($sql2);
+
+						if($res2)
+						{
+							$sql3="DELETE FROM ".$tabla." WHERE ".$idTabla."='".$fil1[$idTabla]."'";
+							$res3=mysql_query($sql3);
+						}
+					}
+				}	
+			}			
+		}
+	}
+
+
+
 	function quitaCaracteresEspeciales($cadena)
 	{
 		$cadena=str_replace("'","",$cadena);

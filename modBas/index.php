@@ -2001,8 +2001,9 @@
 			$tiposDocumentos=Array("tipoDocumentoPS","tipoDocumentoCA","tipoDocumentoCI","tipoDocumentoDG","tipoDocumentoCNC","tipoDocumentoOD","tipoDocumentoPC");
 			$importes=Array("importePS","importeCA","importeCI","importeDG","importeCNC","importeOD","importePC");
 			$tablas=Array("ahorradorParteSocial","ahorradorCuentasAhorro","ahorradorCuentasInversion","ahorradorDepositosGarantia","ahorradorChequesNoCobrados","ahorradorOtrosDepositos","ahorradorPrestamosCargo");
+			$leyendasA=Array("parte social","cuentas de ahorro","cuentas de inversión","depósitos en garantía","cheques no cobrados","otros depósitos","prestamos a cargo");
 			$idTablas=Array("idahorradorParteSocial","idahorradorCuentasAhorro","idahorradorCuentasInversion","idahorradorDepositosGarantia","idahorradorChequesNoCobrados","idahorradorOtrosDepositos","idahorradorPrestamosCargo");
-
+			$tablasHistoricosAnalitica=Array("historicoAhorradorParteSocial","historicoAhorradorCuentasAhorro","historicoAhorradorCuentasInversion","historicoAhorradorDepositosGarantia","historicoAhorradorChequesNoCobrados","historicoAhorradorOtrosDepositos","historicoAhorradorPrestamosCargo");
 
 
 			// ACTUALIZACION DE LA BASE ANALITICA //
@@ -2034,9 +2035,17 @@
 				}
 			}
 
+			
+			// AQUI YA TENGO TODOS LOS AHORRADORES EN UN ARREGLO $ahorradoresAnalitica//
+			
+			echo "COMIENZA LA ACTUALIZACIÓN DE LA BASE ANALÍTICA";
+			echo "<div class='separador'></div>";
+
+			//GUARDO LOS HISTÓRICOS ANALITICOS DE LOS AHORRADORES Y LOS BORRO YA DE LA TABLA
+			guardaHistoricoAnalitica($ahorradoresAnalitica);
 
 
-			// AQUI YA TENGO TODOS LOS AHORRADORES EN UN ARREGLO //
+			// INSERTO TODO EL DEBE DECIR  //
 			foreach($ahorradoresAnalitica as $k => $v)
 			{
 				$folioIdentificador=$k;
@@ -2044,67 +2053,46 @@
 
 				echo "MODIFICANDO EL DETALLE (BASE ANALÍTICA) EL AHORRADOR: <strong>".dameNombreAhorrador($folioIdentificador)."</strong> (".$folioIdentificador.")<br>";
 
-				$diceArr=$v["dice"];
+				// $diceArr=$v["dice"];
 				$debedecirArr=$v["debedecir"];
+				
+				// echo "<pre>";
+				// print_r($debedecirArr);
+				// echo "</pre>";
+				// echo "<br>";
+				
 
-				foreach($diceArr as $indiceDice => $dice)
+				foreach($debedecirArr as $indice => $debeDecir)
 				{
-					$debeDecir=$debedecirArr[$indiceDice];
-
-					foreach($camposFolios as $indiceCampos => $folio)
+					if($debeDecir["estatus"]=="DEBE DECIR")
 					{
-						$tabla=$tablas[$indiceCampos];
-						$idTablaC=$idTablas[$indiceCampos];
-						$tipoDocumento=$dice[$tiposDocumentos[$indiceCampos]];
-						$folio=$dice[$camposFolios[$indiceCampos]];
-						$importe=$dice[$importes[$indiceCampos]];
-
-						$tipoDocumento2=$debeDecir[$tiposDocumentos[$indiceCampos]];
-						$folio2=$debeDecir[$camposFolios[$indiceCampos]];
-						$importe2=$debeDecir[$importes[$indiceCampos]];
-
-						
-						//Busco ese documento
-						$sqlAnAh="SELECT * FROM ".$tabla." WHERE UPPER(tipoDocumento)='".strtoupper($tipoDocumento)."' AND folio='".$folio."' AND importe='".$importe."' AND ahorrador_idahorrador='".$idahorrador."'";
-						//echo "<br>".$sqlAnAh."<br>";
-						$resAnAh=mysql_query($sqlAnAh);
-						if(mysql_num_rows($resAnAh)>0)
+						foreach($camposFolios as $indiceCampos => $folio)
 						{
-							echo "Buscando en el rubro <strong>".$tipoDocumento."</strong> con el folio ".$folio." y el importe $ ".separarMiles($importe);
-							echo "<span class='exito'> ENCONTRADO </span>";
-							echo "<br>";
-							//Busco lo que debe decir
-							$filAnAh=mysql_fetch_row($resAnAh);
-							$idTabla=$filAnAh[0];
-							echo "Actualizando  por <strong>".$tipoDocumento2."</strong> con el folio ".$folio2." y el importe $ ".separarMiles($importe2);
-							$sqlDD="UPDATE ".$tabla." SET tipoDocumento='".$tipoDocumento2."', folio='".$folio2."', importe='".$importe2."' WHERE ".$idTablaC."='".$idTabla."'";
-							$resDD=mysql_query($sqlDD);
-							if($resDD)
-								echo "<span class='exito'> ACTUALIZADO </span>";
-							else
+							$tabla=$tablas[$indiceCampos];
+							$idTabla=$idTablas[$indiceCampos];					
+							$tipoDocumento=$debeDecir[$tiposDocumentos[$indiceCampos]];
+							$folio=$debeDecir[$camposFolios[$indiceCampos]];
+							$importe=$debeDecir[$importes[$indiceCampos]];
+
+							if($importe>0)
 							{
-
+								$sqlInsertNew="INSERT INTO ".$tabla." (tipoDocumento, folio, importe, ahorrador_idahorrador) VALUES ('".$tipoDocumento."','".$folio."','".$importe."','".$idahorrador."')";
+								//echo $sqlInsertNew."<br>";
+								$resInsertNew=mysql_query($sqlInsertNew);
+								if(!$resInsertNew)
+									echo "<br>".$sqlInsertNew."<br>error:<br>".mysql_error()."<br>";
+								else
+								{
+									echo "<span class='exito'>SE REGISTRÓ EL DOCUMENTO <strong>".$tipoDocumento."</strong> CON FOLIO <strong>".$folio."</strong> y monto <strong>$ ".separarMiles($importe)."</strong></span><br>";
+								}
 							}
-							echo "<br><br>";
-
-							
 						}
-						// else
-						// {
-						// 	//echo "<span class='error'> NO ENCONTRADO </span>";
-						// 	// echo "<br><br>";
-						// 	// echo $sqlAnAh;
-						// 	// echo "<br><br>";
-						// }
-
-						
 					}
 				}
 				echo "<br><br>";
 				echo "<div class='separador'></div>";
 			}
-			// AQUI YA TENGO TODOS LOS AHORRADORES EN UN ARREGLO //
-			// ACTUALIZACION DE LA BASE ANALITICA //
+			// FIN INSERTO TODO EL DEBE DECIR //
 
 
 

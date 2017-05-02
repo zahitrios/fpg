@@ -941,7 +941,7 @@ function aprobarMinistracion()
 	echo "<br><br>";
 	?>
 	<form action="" method="post">
-		Al dar click en <strong>Continuar</strong> se harán las modificaciones al convenio y al padrón de ahorradores correspondientes a esta ministración
+		Al dar click en <strong>Continuar</strong> se procesará la ministración
 		<br><br>
 		<input type="button" value="Cancelar" class="botonRojoChico"  onclick="cargaModulo('mins')">
 		&nbsp;&nbsp;&nbsp;
