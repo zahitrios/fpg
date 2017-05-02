@@ -2,7 +2,7 @@
 	
 	session_start();
 
-	define("RUTA", "/~fipago/"); //en servidor
+	define("RUTA", "/~dev/"); //en servidor
 	define("TIEMPO_SESION",90);  //en minutos
 	define("MONTO_MAXIMO_PAGO",167930.00); 
 
@@ -11,7 +11,7 @@
 	//error_reporting(E_ERROR | E_WARNING | E_PARSE);
 	error_reporting(E_ERROR | E_PARSE);
 
-
+ 
 
 	/*
 	ini_set('display_errors', 1);
@@ -22,9 +22,9 @@
 	function conectDB()
 	{
 		
-		$udb="fipago_user";
+		$udb="dev_fipago_user";
 		$psdb="Eln1n0d3l4s3lv4!";
-		$ndb="fipago_db";
+		$ndb="dev_fipago_db";
 		$hdb="localhost";
 		
 		$link = mysql_connect($hdb, $udb, $psdb);
@@ -41,9 +41,9 @@
 
 	function conectDBReturn()
 	{
-		$udb="fipago_user";
+		$udb="dev_fipago_user";
 		$psdb="Eln1n0d3l4s3lv4!";
-		$ndb="fipago_db";
+		$ndb="dev_fipago_db";
 		$hdb="localhost";
 		
 		$link = mysql_connect($hdb, $udb, $psdb);

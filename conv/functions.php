@@ -588,6 +588,27 @@ function formEdit()
 			<?php
 				if($convenio['idstatusConvenio']>1 && $convenio['idstatusConvenio']<5) //Incluye firmado, operacion, proceso
 				{
+
+
+					// $options = dameIdDocumentos($idrevisionesTemporales);
+					// $todos=dameGridTable("documentosValor","nombre");
+					
+					// $idsOptions=Array();
+					// $idsTodos=Array();
+
+					// foreach($options as $k => $v)
+					// 	$idsOptions=$v[0];
+					
+					// foreach ($todos as $k => $v)
+					// 	$idsTodos=$v["iddocumentosValor"];
+					
+					// $options2=array_diff ($idsTodos,$idsOptions);
+
+
+					$options2=dameIdDocumentosSinAgregar($idrevisionesTemporales);
+
+
+
 					?>
 
 					<!-- Drag & drop module -->
@@ -601,10 +622,6 @@ function formEdit()
 								<button type="button" id="dd-add-all" class="dd-button">>> Todos</button>
 								<ul id="src-list" class="dd-source dd-list">
 									<?php 
-										$options = dameIdDocumentos($idrevisionesTemporales);
-										$todos=dameGridTable("documentosValor","nombre");
-										$options2=array_diff ( $todos, $options);
-
 									foreach($options2 as $key => $opt): ?>
 										<li class="dd-list-item" data-value="<?= $opt[0]?>"><?= $opt[1] ?></li>
 									<?php endforeach; ?>

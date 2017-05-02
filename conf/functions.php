@@ -1,8 +1,12 @@
 <?php
 
 	include_once ("config.php");
+
+
 	if(!isset($link))
 		$link=conectDBReturn();
+
+	
 
 	function cargaModulos()
 	{
@@ -50,7 +54,8 @@
 	function intentaLogin()
 	{
 		global $_REQUEST;
-	
+		
+
 
 		$sql="SELECT * FROM usuarios WHERE statusUsuarios_idstatusUsuarios=1 AND user='".$_REQUEST["user"]."' AND pss=MD5('".$_REQUEST["pss"]."')";
 		$res=mysql_query($sql);
@@ -1822,7 +1827,7 @@
 
 
 		return $fil["total"];
-	}
+	} 
 
 
 	function dameIdDocumentos($idrevisionesTemporales)

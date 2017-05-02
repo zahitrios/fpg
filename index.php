@@ -1,6 +1,8 @@
 <?php
 
+
 	include ("conf/functions.php");
+
 
 	$action=$_REQUEST["a"];
 
