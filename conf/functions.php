@@ -2114,6 +2114,20 @@
 		}
 	}
 
+	function dameNombreDocumentoValor($iddocumentosValor)
+	{
+		$sql="SELECT nombre FROM documentosValor WHERE iddocumentosValor='".$iddocumentosValor."'";
+		$res=mysql_query($sql);
+
+		if(mysql_num_rows($res)>0)
+		{
+			$fil=mysql_fetch_assoc($res);
+			return $fil["nombre"];
+		}
+
+		return "";
+	}
+
 
 
 	function quitaCaracteresEspeciales($cadena)

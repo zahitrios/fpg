@@ -210,3 +210,12 @@ body
 {
 	background-color:#ff0000 !important;
 }
+
+.agrupador
+{
+	border:1px solid #ff0000;
+	border-radius:15px;
+	text-align:center;
+	padding-top:10px;
+	padding-bottom:10px;
+}

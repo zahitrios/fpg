@@ -28,8 +28,6 @@
 
 		<script language="javascript" src="../functions.js"></script>
 		<script language="javascript" src="./functions.js"></script>
-		
-		
 	</head>
 
 	<body>

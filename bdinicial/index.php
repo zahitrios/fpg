@@ -1,5 +1,4 @@
 <?php
-
 	session_start();
 	include_once ("../conf/functions.php");
 	validarSession();
@@ -16,9 +15,6 @@
 		echo "SU USUARIO NO PUEDE REALIZAR ESTA ACCION";
 		die;
 	}
-
-
-
 ?>
 
 <html>
@@ -35,6 +31,9 @@
 		<link rel="stylesheet" type="text/css" href="<?php echo RUTA; ?>lib/CustomFileInputs/css/component.css" />
 
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  		<script src="//code.jquery.com/jquery-1.12.4.js"></script>
+  		<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
 		<script language="javascript" src="../functions.js"></script>
 		<script language="javascript" src="./functions.js"></script>
@@ -111,6 +110,10 @@
 								eliminaError();
 							break;
 
+							case "lanzaCuadroUnionSociedadesDocumentos":
+								lanzaCuadroUnionSociedadesDocumentos();
+							break;
+							
 							default:
 								actualizaNumeroErrores();
 								formularioSubida();
@@ -180,10 +183,9 @@
 		
 		$ds->SelectCommand = "SELECT revisionesTemporales.idrevisionesTemporales,
 									 revisionesTemporales.fecha,
-									 revisionesTemporales.usuarios_idusuarios,
 									 revisionesTemporales.totalErrores,
 									 estado.nombre AS estado, 
-									 SUBSTRING(revisionesTemporales.archivo,13) AS archivo, usuarios.nombre FROM revisionesTemporales INNER JOIN usuarios ON usuarios_idusuarios=idusuarios INNER JOIN estado ON idestado=estado_idestado ORDER BY fecha DESC ";
+									 SUBSTRING(revisionesTemporales.archivo,13) AS archivo FROM revisionesTemporales INNER JOIN estado ON idestado=estado_idestado ORDER BY fecha DESC ";
 		$grid = new KoolGrid("grid");
 
 		$grid->scriptFolder="../lib/KoolPHPSuite/KoolControls/KoolGrid";
@@ -223,10 +225,7 @@
 		$column->DataField = "estado";		
 		$grid->MasterTable->AddColumn($column);	
 
-		$column = new GridBoundColumn();
-		$column->HeaderText = "Usuario";
-		$column->DataField = "nombre";		
-		$grid->MasterTable->AddColumn($column);			
+	
 
 
 		$column = new GridBoundColumn();
@@ -404,6 +403,27 @@
 						<ul id="dest-list" class="dd-dest dd-list clean"></ul>
 					</div>
 				</div>
+
+				<br><br>
+				<input type='button' class='botonRojo' onclick='javascript:muestra("draggable");' value='Agregar nuevo documento al catálogo'>
+				<br><br>
+				
+
+
+
+
+				<div id="draggable" class="ui-widget-content">
+					<br><br>
+					<input type='text' placeholder='Nuevo documento de valor' id='nombreNuevoDocumento' name='nombreNuevoDocumento' style='width:450px;' />
+					<br><br>
+					<input type='submit' value='Cancelar' class='botonRojoChico' onclick='javascript:oculta("draggable")'>
+					&nbsp;&nbsp;&nbsp;
+					<input type='submit' value='Guardar' class='botonRojoChico' onclick='javascript:guardaNuevoDocumento();'>
+				</div>
+
+
+
+
 				<script>
 					// Search, drag & drop list
 					(function () {
@@ -1162,8 +1182,19 @@
 		<?php
 	}
 
+
+
 	
-	
+	function lanzaCuadroUnionSociedadesDocumentos()
+	{
+		global $_REQUEST;
+
+		echo "lanzando el cuadro para relacionar sociedades y documentos<br>";
+
+	}
+
+
+
 
 	function comenzarReporteConsolidada($getErrores=0)
 	{
@@ -2171,7 +2202,7 @@
 							$camposAnalitica = array("","importePS","importeCA","importeCI","importeDG","importeCNC","importeOtros","importePrestamos","saldoNeto100","saldoNeto70","montoMaximoPago");
 							$leyendas = array("No. total de ahorradores","Total de parte social ($)","Total en cuentas de ahorro ($)","Total en cuentas de inversión ($)","Total en depósitos en garantía ($)","Total en cheques no cobrados ($)","Total en otros depósitos ($)","Total en préstamos a cargo ($)","Total en saldos netos al 100% ($)","Total en saldos netos al 70% ($)","Total en montos máximo de pagos ($)");
 							
-							$foliosCajas=array("001","002","003","004","005","006","007","008","009","010","011","012","013","014","015","016","017","018","019","020","021","022","023","024","025","026","027","028","029","030","031","032","033","034","035","036","037","038","039","040","041","042","043","044","045","046","047","048","049","050","051","052","053","054","055","056","057","058","059","060","061","062","063","064","065","066","067","068","069","070");
+							$foliosCajas=array("001","002","003","004","005","006","007","008","009","010","011","012","013","014","015","016","017","018","019","020","021","022","023","024","025","026","027","028","029","030","031","032","033","034","035","036","037","038","039","040","041","042","043","044","045","046","047","048","049","050","051","052","053","054","055","056","057","058","059","060","061","062","063","064","065","066","067","068","069","070","071","072","073","074","075","076","077","078","079","080");
 							
 							
 
@@ -2480,6 +2511,10 @@
 
 		<?php
 	}
+
+
+
+	
 
 
 

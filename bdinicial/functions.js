@@ -183,7 +183,8 @@ function cuentaProceso(fileD)
 			document.getElementById("imagenCargando").style.display="none";
 			
 			cadena+="<form id='formulario' action='./index.php' method='post' >";
-				cadena+="<input type='hidden' name='a' value='comenzarReporteConsolidada' />";
+				//cadena+="<input type='hidden' name='a' value='comenzarReporteConsolidada' />";
+				cadena+="<input type='hidden' name='a' value='lanzaCuadroUnionSociedadesDocumentos' />";
 				cadena+="<input type='hidden' name='fileD' value='"+fileD+"' />";
 				cadena+="<input type='hidden' name='estado' value='"+estado+"' />";
 				cadena+="<input type='hidden' name='documentosValor' value='"+documentosValor+"' />";
@@ -211,6 +212,47 @@ function cuentaProceso(fileD)
 }
 
 
+function oculta(idelemento)
+{
+	document.getElementById(idelemento).style.display="none";
+}
+
+function muestra(idelemento)
+{
+	document.getElementById(idelemento).style.display="block";
+}
+
+
+
+
+
+function guardaNuevoDocumento()
+{
+	var nombreNuevoDocumento=document.getElementById('nombreNuevoDocumento').value;
+	if(nombreNuevoDocumento=="")
+	{
+		alert ("Debe ingresar el nombre del documento");
+	}
+	else
+	{
+		$.ajax({url: "functions.php?a=guardaNuevoDocumento&n="+nombreNuevoDocumento, success: function(result)
+	    {   
+	    	//alert ("result: "+result);
+	    	var resultado=result.split(",");
+	    	var ul=document.getElementById("src-list");
+
+	    	ul.innerHTML= '<li class="dd-list-item" data-value="'+resultado[0]+'">'+resultado[1]+'</li>' + ul.innerHTML;
+
+	    	document.getElementById("draggable").style.display="none";
+
+	    }});
+	}
+
+	
+}
+
+
+
 
 
 $(function() { //shorthand document.ready function
@@ -220,7 +262,7 @@ $(function() { //shorthand document.ready function
         this.submit();
     });
 
+    $( "#draggable" ).draggable();
+
 });
-
-
 

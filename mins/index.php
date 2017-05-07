@@ -1,5 +1,4 @@
 <?php
-
 	session_start();
 	include_once ("../conf/functions.php");
 	validarSession();
@@ -13,7 +12,6 @@
 		echo "SU USUARIO NO PUEDE REALIZAR ESTA ACCION";
 		die;
 	}
-
 ?>
 
 <html>
@@ -1031,7 +1029,7 @@ function comienzaActualizaciones()
 	echo "<div class='separador'></div>";
 	echo "LOTE: ".$ministracionTemporal["lote"]."<br>";
 	echo "ESTADO: ".$estado["nombre"]."<br>";
-	echo "CONVENIO: ".$convenio["idconvenio"]." - $ ".separarMiles($convenio["montoTotalConvenio"])."<br>";
+	echo "CONVENIO: ".$convenio["idconvenio"]." - ".convierteTimeStampCorto($convenio["fechaFirma"])." - $ ".separarMiles($convenio["montoTotalConvenio"])."<br>";
 	echo "SOCIEDADES: <ul>";
 	foreach($sociedades as $k => $sociedad)
 	{
@@ -1145,7 +1143,7 @@ function muestraResumenReporte()
 		echo "<div class='separador'></div>";
 		echo "LOTE: ".$ministracionTemporal["lote"]."<br>";
 		echo "ESTADO: ".$estado["nombre"]."<br>";
-		echo "CONVENIO: ".$convenio["idconvenio"]." - $ ".separarMiles($convenio["montoTotalConvenio"])."<br>";
+		echo "CONVENIO: ".$convenio["idconvenio"]." - ".convierteTimeStampCorto($convenio["fechaFirma"])." - $ ".separarMiles($convenio["montoTotalConvenio"])."<br>";
 		echo "SOCIEDADES: <ul>";
 		foreach($sociedades as $k => $sociedad)
 		{
@@ -1163,12 +1161,4 @@ function muestraResumenReporte()
 	<br><br>
 	<?php
 }
-
-
-
 ?>
-
-
-
-
-

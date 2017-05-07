@@ -40,7 +40,29 @@
 			checkFilasTodasResumen();
 		break;
 
+		case "guardaNuevoDocumento":
+			guardaNuevoDocumento();
+		break;
 
+
+	}
+
+
+
+
+	function guardaNuevoDocumento()
+	{
+		global $_REQUEST;
+
+		$sql="INSERT INTO documentosValor (nombre) VALUES ('".$_REQUEST["n"]."')";
+		$res=mysql_query($sql);
+		if(!$res)
+			echo "0";
+		else
+		{
+			$idNuevoDocumentosValor=mysql_insert_id();
+			echo $idNuevoDocumentosValor.",".$_REQUEST["n"];
+		}
 	}
 
 
@@ -70,7 +92,7 @@
 		$filaResumen2=$_REQUEST["filaResumen2"];
 
 		//Inserto la revision temporal
-		$sql="INSERT INTO revisionesTemporales (usuarios_idusuarios,archivo,estado_idestado) VALUES ('".dameIdUserMd5($_SESSION["i"])."','".$file."','".$estado."')";
+		$sql="INSERT INTO revisionesTemporales (archivo,estado_idestado) VALUES ('".$file."','".$estado."')";
 		$res=mysql_query($sql);
 		$idrevisionesTemporales=mysql_insert_id();
 		guardaLog(dameIdUserMd5($_SESSION["i"]),2,"revisionesTemporales",$idrevisionesTemporales);
@@ -160,6 +182,26 @@
 
 		insertRegistros("resumenTemporales",$idrevisionesTemporales,$file,$hojaResumen,$filaResumen,$filaResumen2);
 		limpiaUltimosRegistros($idrevisionesTemporales,"resumen");
+
+
+		//INSERTO TODAS LAS SOCIEDADES EN sociedadesTemporales
+		$foliosCajas=array("001","002","003","004","005","006","007","008","009","010","011","012","013","014","015","016","017","018","019","020","021","022","023","024","025","026","027","028","029","030","031","032","033","034","035","036","037","038","039","040","041","042","043","044","045","046","047","048","049","050","051","052","053","054","055","056","057","058","059","060","061","062","063","064","065","066","067","068","069","070","071","072","073","074","075","076","077","078","079","080");
+		
+		$sql="SELECT DISTINCT(descripcion) FROM resumenTemporales WHERE descripcion<>'' AND UPPER(descripcion)<>'TOTAL' AND revisionesTemporales_idrevisionesTemporales='".$revisionesTemporales_idrevisionesTemporales."' ORDER BY idresumenTemporales ASC";
+		$res=mysql_query($sql);
+		$contadorFoliosCajas=0;
+		while($fil=mysql_fetch_assoc($res))
+		{
+			$folioCaja=$foliosCajas[$contadorFoliosCajas];
+			$nombreCaja=$fil["descripcion"];
+
+			$sqlIn="INSERT INTO sociedadesTemporales (folio,nombre,revisionesTemporales_idrevisionesTemporales) VALUES ('".$folioCaja."','".$nombreCaja."','".$revisionesTemporales_idrevisionesTemporales."')";
+			$resIn=mysql_query($sqlIn);
+
+			$contadorFoliosCajas++;
+		}
+		//INSERTO TODAS LAS SOCIEDADES EN sociedadesTemporales 
+
 	}
 
 

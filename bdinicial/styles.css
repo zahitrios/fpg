@@ -1,3 +1,33 @@
+
+#draggable 
+{
+    width: 900px;
+    height: 500px;
+    padding: 0.5em;
+    background-color: rgba(255,255,255,0.95);
+    z-index: 99999;
+    position: fixed;
+    top:250px;
+    left:450px;
+    margin-top:-250px;
+    margin-left:-450px;
+    border-radius: 15px;
+    border: 1px solid #fc0101;
+    display:none;
+    overflow: auto;
+}
+
+
+
+#botonCerrar
+{
+  cursor: pointer;
+    width: 30px;
+    position: relative;
+    top: -7px;
+    float: right;
+}
+
 #containerPrincipal
 {
     font-size:16px;
