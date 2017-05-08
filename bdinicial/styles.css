@@ -218,6 +218,16 @@
     margin-bottom: 1rem;
 }
 
-
+.cajonCuadroDocumentos
+{
+  border:1px solid #000000;
+  border-radius:9px;
+  margin:0 auto;
+  text-align:left;
+  padding:8px;
+  width:500px;
+  height:300px;
+  overflow:auto;
+}
 
 

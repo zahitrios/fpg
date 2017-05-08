@@ -113,6 +113,10 @@
 							case "lanzaCuadroUnionSociedadesDocumentos":
 								lanzaCuadroUnionSociedadesDocumentos();
 							break;
+
+							case "guardaRelacionSociedadesDocumentos":
+								guardaRelacionSociedadesDocumentos();
+							break;
 							
 							default:
 								actualizaNumeroErrores();
@@ -1189,11 +1193,80 @@
 	{
 		global $_REQUEST;
 
-		echo "lanzando el cuadro para relacionar sociedades y documentos<br>";
+		$idrevisionesTemporales=$_REQUEST["idrevisionesTemporales"];
+		$documentosValor=explode(",",$_REQUEST["documentosValor"]);
+
+		// foreach($_REQUEST as $k => $v)
+		// 	echo $k." -> ".$v."<br>";
+		?>
+		<form  id="formulario" method="post">
+			<?php
+
+				echo "<strong>RELACIONA LAS SOCIEDADES CON LOS DOCUMENTOS DE VALOR QUE SERÁN ACEPTADOS PARA ESTA REVISIÓN</strong><br><br>";
+
+				//PARA CADA SOCIEDAD PONGO LOS DOCUMENTOS QUE SE SELECCIONARON EN EL CONVENIO
+				$sql ="SELECT * FROM sociedadesTemporales WHERE revisionesTemporales_idrevisionesTemporales='".$idrevisionesTemporales."'";
+				$res=mysql_query($sql);
+				while($fil=mysql_fetch_assoc($res))
+				{
+					?>
+					<div class='separador'></div><?php echo $fil["nombre"]; ?>
+
+					<div class="cajonCuadroDocumentos">
+						<?php
+							foreach($documentosValor as $key => $opt)
+								echo '<input type="checkbox"  name="sociedad_'.$fil["idsociedadesTemporales"].'_documento_'.$opt.'" value="'.$opt.'"> '.dameNombreDocumentoValor($opt).'<br>';
+						?>
+					</div>
+					<?php
+				}
+				//FIN PARA CADA SOCIEDAD PONGO LOS DOCUMENTOS QUE SE SELECCIONARON EN EL CONVENIO
+				?>
+
+				<br>
+				<br>
+				
+
+					<input type="hidden" name="a" value="guardaRelacionSociedadesDocumentos" />
+					<input type="hidden" name="idrevisionesTemporales" value="<?php echo $idrevisionesTemporales; ?>" />
+
+					<br><br>
+
+					<?php
+						foreach($_REQUEST as $k => $v)
+						{								
+							if($k!="a" && $k!="PHPSESSID")
+								echo "<input type='hidden' name='".$k."' value='".$v."' />";								
+						}
+					?>
+
+					<input type="submit" value="Siguiente" class="botonRojo">
+		
+		</form>
+		<?php
 
 	}
 
+	function guardaRelacionSociedadesDocumentos()
+	{
+		global $_REQUEST;
 
+		$idrevisionesTemporales=$_REQUEST["idrevisionesTemporales"];
+
+		$sociedades=Array();
+		foreach($_REQUEST as $k => $v)
+		{
+			if(strpos($k,"documento_"))
+			{
+				$partes=explode("_",$k);
+				//$sociedades[$partes[1]][]=$partes[3];
+				$sql="INSERT INTO documentosValorSociedadesTemporales (sociedadesTemporales_idsociedadesTemporales,documentosValor_iddocumentosValor) VALUES (".$partes[1].",".$partes[3].")";
+				$res=mysql_query($sql);
+			}
+		}
+
+		comenzarReporteConsolidada();
+	}
 
 
 	function comenzarReporteConsolidada($getErrores=0)
@@ -2192,9 +2265,56 @@
 								echo "</ol>";
 							echo "</div>";
 							echo "<br><br>";
-
+							
 
 							
+							//BUSCO LOS DOCUMENTOS DE VALOR POR SOCIEDAD QUE ESTEN LIGADOS AL AHORRADOR
+
+								$archivos=Array("tipoDocumentoPS","tipoDocumentoCA","tipoDocumentoCI","tipoDocumentoDG","tipoDocumentoCNC","tipoDocumentoOtros","tipoDocumentoPrestamos");
+								$leyendas=Array("parte social","cuentas de ahorro","cuentas de inversión","depósitos en garantia","cheques no cobrados","otros documentos","prestamos a cargo");
+								
+								$sqlSocTem="SELECT * FROM sociedadesTemporales WHERE revisionesTemporales_idrevisionesTemporales='".$idrevisionesTemporales."'";
+								$resSocTem=mysql_query($sqlSocTem);
+								while($filSocTem=mysql_fetch_assoc($resSocTem)) //PARA CADA SOCIEDAD TEMPORAL TRAIGO EL FOLIO Y EL NOMBRE
+								{
+									$documentosValor=Array();
+									$idsociedadesTemporales=$filSocTem["idsociedadesTemporales"];
+									$folioSociedadTemporal=$filSocTem["folio"];
+									$nombreSociedadTemporal=$filSocTem["nombre"];
+
+									//TRAIGO TODOS LOS DOCUMENTOS DE VALOR ASOCIADOS A ESTA SOCIEDA
+									$sqlDocVal="SELECT documentosValor.nombre FROM documentosValorSociedadesTemporales INNER JOIN documentosValor ON iddocumentosValor=documentosValor_iddocumentosValor WHERE sociedadesTemporales_idsociedadesTemporales='".$idsociedadesTemporales."'";
+									$resDocVal=mysql_query($sqlDocVal);
+									while($filDocVal=mysql_fetch_assoc($resDocVal))
+										$documentosValor[]="'".$filDocVal["nombre"]."'";
+
+									$documentosValor=implode(",",$documentosValor);
+
+									//echo "Los documentos de valor de la sociedad temporal ".$nombreSociedadTemporal." son ".$documentosValor."<br>";
+
+									//BUSCO LOS DOCUMENTOS DE VALOR QUE NO ESTÉN EN LA LISTA
+									foreach($archivos as $indiceArchivo => $archivo)
+									{
+										$sqlRevisionDocumentos="SELECT * FROM analiticasTemporales WHERE nuevoFolioIdentificador LIKE '".$folioSociedadTemporal."%' AND ".$archivo." NOT IN(".$documentosValor.") AND revisionesTemporales_idrevisionesTemporales='".$idrevisionesTemporales."' AND nuevoFolioIdentificador<>''";
+										$resRevisionDocumentos=mysql_query($sqlRevisionDocumentos);
+										if(mysql_num_rows($resRevisionDocumentos)>0)
+										{
+											while($filRevisionDocumentos=mysql_fetch_assoc($resRevisionDocumentos))
+											{
+												$cadenaError="En la fila ".$filRevisionDocumentos["filaDocumentoOriginal"]." de la base analítica esta el documento <strong>".$filRevisionDocumentos[$archivo]."</strong> el cuál no está asociado a la sociedad <strong>".$nombreSociedadTemporal."</strong>";
+												echo "<span class='error'>".$cadenaError."</span><br>";
+												guardaErrorRevision($idrevisionesTemporales,$cadenaError);
+											}
+										}
+									}
+								}
+
+							//FIN DE BUSCO LOS DOCUMENTOS DE VALOR POR SOCIEDAD QUE ESTEN LIGADOS AL AHORRADOR
+
+
+
+
+							echo "<br><br>";
 							$sumasMenores = array("noAhorradores"=>0,"parteSocial"=>0,"cuentaAhorro"=>0,"cuentaInversion"=>0,"depositosGarantia"=>0,"chequesNoCobrados"=>0,"otrosDepositos"=>0,"prestamosCargo"=>0,"saldoNetoAhorro100"=>0,"saldoNetoAhorro70"=>0,"montoMaximoPago"=>0);
 							$sumasMayores = array("noAhorradores"=>0,"parteSocial"=>0,"cuentaAhorro"=>0,"cuentaInversion"=>0,"depositosGarantia"=>0,"chequesNoCobrados"=>0,"otrosDepositos"=>0,"prestamosCargo"=>0,"saldoNetoAhorro100"=>0,"saldoNetoAhorro70"=>0,"montoMaximoPago"=>0);
 							$camposResumen = array("noAhorradores","parteSocial","cuentaAhorro","cuentaInversion","depositosGarantia","chequesNoCobrados","otrosDepositos","prestamosCargo","saldoNetoAhorro100","saldoNetoAhorro70","montoMaximoPago");
@@ -2600,7 +2720,6 @@
 
 		echo "<div id='divListaArchivos'>";
 			muestraCuadroArchivos($idrevisionesTemporales);
-
 		echo "</div>";
 
 

@@ -1413,10 +1413,9 @@
 
 			//if($eliminar=1 && !(strpos($fil["descripcion"],"$")===false ||  strpos($fil["descripcion"],"documento")===false ))
 			//if($eliminar=1 && !(strpos($fil["descripcion"],"$")===false))
-			if($eliminar==1 )
-			{
+			if($eliminar==1 && (strpos($fil["descripcion"],"$")===false  && strpos($fil["descripcion"],"asociado a la sociedad")===false ) )
 				echo "<br><input class='botonRojoChico' onclick='eliminaError(\"".$fil["iderroresRevisiones"]."\");' type='button' value='Marcar como resuelto'><br><br>";
-			}
+			
 			echo "<br><br>";
 		}
 	}

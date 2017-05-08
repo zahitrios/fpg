@@ -18,12 +18,13 @@
 
 
 	$sql[]="TRUNCATE revisionesTemporales";
+	$sql[]="TRUNCATE sociedadesTemporales";
 	$sql[]="TRUNCATE analiticasTemporales";
 	$sql[]="TRUNCATE consolidadasTemporales";
 	$sql[]="TRUNCATE resumenTemporales";
 	$sql[]="TRUNCATE erroresRevisiones";
 	$sql[]="TRUNCATE revisionesTemporales_has_documentosValor";
-	$sql[]="TRUNCATE revisionesTemporales_has_documentosValor";
+	$sql[]="TRUNCATE documentosValorSociedadesTemporales";
 	$sql[]="TRUNCATE log";
 
 
