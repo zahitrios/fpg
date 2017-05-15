@@ -238,10 +238,21 @@ function cuentaProceso(fileD)
 }
 
 
-function agregaDocumentosValorConvenio()
+function guardaNuevosDocumentosPermitidos(idConvenioMd5)
 {
 	var documentosValor=document.getElementById("selected-input").value;
-	alert (documentosValor);
+	if(documentosValor!="")
+	{
+		parametros="?a=agregaDocuemntosConvenio&documentosValor="+documentosValor+"&i="+idConvenioMd5;
+		$.ajax({url:"./functions.php"+parametros, success: function(result)
+		{	
+			location.reload();
+		}});
+	}
+	else
+	{
+		alert ("Debe elegir documentos para agregar al convenio");
+	}
 }
 
 

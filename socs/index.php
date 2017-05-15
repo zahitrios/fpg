@@ -40,7 +40,7 @@
 	$grid->AllowResizing = true;
 	$grid->AllowFiltering = true;
 	$grid->AllowSorting = true;
-	$grid->MasterTable->ShowFunctionPanel = true;	
+	$grid->MasterTable->ShowFunctionPanel = false;	
 	
 	
 	$column = new GridBoundColumn();

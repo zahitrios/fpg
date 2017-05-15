@@ -52,7 +52,13 @@
 		checkFilasTodasResumen();
 		die;
 	}
-	
+
+	else if($action=="agregaDocuemntosConvenio")
+	{
+		global $_REQUEST;
+		agregaDocuemntosConvenio();
+		die;
+	}
 
 
 	?>
@@ -127,6 +133,12 @@
 									case "generaConvenio":
 										generaConvenio();										
 									break;
+
+									case "guardarRelacionSociedadDocumento":
+										guardarRelacionSociedadDocumento();										
+									break;
+
+									
 								}
 							?>
 						</div>
@@ -572,155 +584,265 @@ function formEdit()
 				?>
 			</div>
 			<br><br>
-
-
-			
-			<strong>Documentos aceptados:</strong>
-			<ul>
-				<?php $options = dameIdDocumentos($idrevisionesTemporales);
-				foreach($options as $key => $opt): ?>
-					<li><?= $opt[1]; ?></li>
-				<?php endforeach; ?>
-			</ul>
-			<br><br>
+			<input type="hidden" name="a" value="edicionConvenio" />
+			<input type="hidden" name="i" value="<?php echo $idconvenio; ?>" />
+			<input type="hidden" name="statusConvenio_idstatusConvenio" value="1" /> <!-- convenio en proyecto -->
+			<?php	
+				if($convenio['idstatusConvenio']!=3) //Si ya se publico no hay cambios
+					echo '<input type="submit" value="Guardar cambios" class="botonRojo">';
 
 				
-			<?php
-				if($convenio['idstatusConvenio']>1 && $convenio['idstatusConvenio']<5) //Incluye firmado, operacion, proceso
+				if($convenio['idstatusConvenio']>=2) //Si ya se firmo ya hay ahorradores en el padrón
 				{
-
-
-					// $options = dameIdDocumentos($idrevisionesTemporales);
-					// $todos=dameGridTable("documentosValor","nombre");
-					
-					// $idsOptions=Array();
-					// $idsTodos=Array();
-
-					// foreach($options as $k => $v)
-					// 	$idsOptions=$v[0];
-					
-					// foreach ($todos as $k => $v)
-					// 	$idsTodos=$v["iddocumentosValor"];
-					
-					// $options2=array_diff ($idsTodos,$idsOptions);
-
-
-					$options2=dameIdDocumentosSinAgregar($idrevisionesTemporales);
-
-
-
-					?>
-
-					<!-- Drag & drop module -->
-					<strong>Agregar documentos permitidos:</strong>			
-						<div class="dd-lists">
-							<!-- De este input se envían los ids de documentos permitidos separados por comas -->
-							<input id="selected-input" type="hidden" name="documentosValor">
-
-							<div class="dd-list-container">
-								<input id="dd-list-search" type="text" class="dd-list-search" placeholder="Buscar...">
-								<button type="button" id="dd-add-all" class="dd-button">>> Todos</button>
-								<ul id="src-list" class="dd-source dd-list">
-									<?php 
-									foreach($options2 as $key => $opt): ?>
-										<li class="dd-list-item" data-value="<?= $opt[0]?>"><?= $opt[1] ?></li>
-									<?php endforeach; ?>
-
-								</ul>
-							</div>
-							<div class="dd-list-container">
-								<button type="button" id="dd-delete-all" class="dd-button">X Borrar todos</button>
-								<ul id="dest-list" class="dd-dest dd-list clean">
-								</ul>
-							</div>
-						</div>
-						<input type="button" class="botonRojo" value="Guardar documentos" />
-
-					
-
-					<script>
-						// Search, drag & drop list
-						(function () {
-
-							var search = document.getElementById("dd-list-search");
-							var selected_input = document.getElementById("selected-input");
-							var src_list = document.getElementById("src-list");
-							var dest_list = document.getElementById("dest-list");
-							var add_all_btn = document.getElementById("dd-add-all");
-							var delete_all_btn = document.getElementById("dd-delete-all");
-
-							change();
-
-							function change () {
-						    var dest_list_items = dest_list.querySelectorAll(".dd-list-item");
-						    dest_list.classList.toggle("clean", (dest_list_items.length <= 0));
-								var selected = [];
-								for (var i = 0; i < dest_list_items.length; i++) {
-									var item = dest_list_items[i];
-									selected.push(item.dataset.value);
-								}
-								selected_input.value = selected.join(",");
-							}
-
-							add_all_btn.addEventListener("click", function () {
-								var src_list_items = src_list.querySelectorAll(".dd-list-item");
-								for (var i = 0; i < src_list_items.length; i++)
-									dest_list.appendChild(src_list_items[i]);
-								change();
-							});
-
-							delete_all_btn.addEventListener("click", function () {
-								var dest_list_items = dest_list.querySelectorAll(".dd-list-item");
-								for (var i = 0; i < dest_list_items.length; i++)
-									src_list.appendChild(dest_list_items[i]);
-								change();
-							});
-
-							dragula([src_list, document.getElementById("dest-list")], {
-								revertOnSpill: true
-							}).on('drop', function (el) {
-						    change();
-						  });
-
-							search.addEventListener("keyup", function (event) {
-								var input = search.value;
-								var src_list_items = src_list.querySelectorAll(".dd-list-item");
-								for (var i = 0; i < src_list_items.length; i++) {
-									var item = src_list_items[i];
-									var option = item.textContent;
-									item.classList.toggle("hide", input && !(option.toLowerCase().indexOf(input.toLowerCase()) >= 0));
-									console.log(option, input && (option.indexOf(input) >= 0));
-								}
-							});
-
-						})();					
-					</script>
-					<!-- /Drag & drop module -->	
-					<?php
+					echo "<br><br>";
+					echo '<input type="button" class="botonRojo" value="Generar base con folios finales" onclick="generaBaseCertificada(\''.md5($idconvenio).'\');" >';
 				}
-			?>
-
 			
+				echo "<br><br>";
+				echo '<input type="button" onclick="cargaModulo(\'conv\');" value="Volver a la lista de convenios" class="botonRojo">';
+			?>
+			<br><br>
+		</div>
+		<div style="clear:both;"></div>
+	</form>
 
 
+
+	<br><br>
+	<div class="separador"></div>
+	<br><br>		
+
+
+
+
+	<div class="tablaCentrada">	
+
+
+		<div class="mitadIzquierda">
+			<strong>Documentos aceptados:</strong>
+				<div class="cajonCuadroDocumentos" style="margin:0 !important;">
+					<ul>
+						<?php $options = dameIdDocumentos($idrevisionesTemporales);
+						foreach($options as $key => $opt): ?>
+							<li><?= $opt[1]; ?></li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
+			<br><br>
 		</div>
 
-		
 
+	
+		<div class="mitadDerecha">			
+				<?php
+					if($convenio['idstatusConvenio']>1 && $convenio['idstatusConvenio']<5) //Incluye firmado, operacion, proceso
+					{
+						$options2=dameIdDocumentosSinAgregar($idrevisionesTemporales);
+						?>
+
+						<!-- Drag & drop module -->
+						<strong>Agregar documentos permitidos:</strong>			
+							<div class="dd-lists" style="margin:0 !important;">
+								<!-- De este input se envían los ids de documentos permitidos separados por comas -->
+								<input id="selected-input" type="hidden" name="documentosValor">
+
+								<div class="dd-list-container">
+									<input id="dd-list-search" type="text" class="dd-list-search" placeholder="Buscar...">
+									<button type="button" id="dd-add-all" class="dd-button">>> Todos</button>
+									<ul id="src-list" class="dd-source dd-list">
+										<?php 
+										foreach($options2 as $key => $opt): ?>
+											<li class="dd-list-item" data-value="<?= $opt[0]?>"><?= $opt[1] ?></li>
+										<?php endforeach; ?>
+
+									</ul>
+								</div>
+								<div class="dd-list-container">
+									<button type="button" id="dd-delete-all" class="dd-button">X Borrar todos</button>
+									<ul id="dest-list" class="dd-dest dd-list clean">
+									</ul>
+								</div>
+							</div>
+							<input type="button" class="botonRojo" value="Guardar documentos" onclick="guardaNuevosDocumentosPermitidos('<?php echo md5($convenio["idconvenio"]); ?>');" />
+
+						
+
+						<script>
+							// Search, drag & drop list
+							(function () {
+
+								var search = document.getElementById("dd-list-search");
+								var selected_input = document.getElementById("selected-input");
+								var src_list = document.getElementById("src-list");
+								var dest_list = document.getElementById("dest-list");
+								var add_all_btn = document.getElementById("dd-add-all");
+								var delete_all_btn = document.getElementById("dd-delete-all");
+
+								change();
+
+								function change () {
+							    var dest_list_items = dest_list.querySelectorAll(".dd-list-item");
+							    dest_list.classList.toggle("clean", (dest_list_items.length <= 0));
+									var selected = [];
+									for (var i = 0; i < dest_list_items.length; i++) {
+										var item = dest_list_items[i];
+										selected.push(item.dataset.value);
+									}
+									selected_input.value = selected.join(",");
+								}
+
+								add_all_btn.addEventListener("click", function () {
+									var src_list_items = src_list.querySelectorAll(".dd-list-item");
+									for (var i = 0; i < src_list_items.length; i++)
+										dest_list.appendChild(src_list_items[i]);
+									change();
+								});
+
+								delete_all_btn.addEventListener("click", function () {
+									var dest_list_items = dest_list.querySelectorAll(".dd-list-item");
+									for (var i = 0; i < dest_list_items.length; i++)
+										src_list.appendChild(dest_list_items[i]);
+									change();
+								});
+
+								dragula([src_list, document.getElementById("dest-list")], {
+									revertOnSpill: true
+								}).on('drop', function (el) {
+							    change();
+							  });
+
+								search.addEventListener("keyup", function (event) {
+									var input = search.value;
+									var src_list_items = src_list.querySelectorAll(".dd-list-item");
+									for (var i = 0; i < src_list_items.length; i++) {
+										var item = src_list_items[i];
+										var option = item.textContent;
+										item.classList.toggle("hide", input && !(option.toLowerCase().indexOf(input.toLowerCase()) >= 0));
+										console.log(option, input && (option.indexOf(input) >= 0));
+									}
+								});
+
+							})();					
+						</script>
+						<!-- /Drag & drop module -->	
+						<?php
+					}
+					else
+					{
+						echo "<span class='subTitulos'>PARA MODIFICAR LOS DOCUMENTOS EL CONVENIO DEBE ESTAR FIRMADO O EN OPERACIÓN</span>";
+					}
+				?>
+		</div>
 		<div style="clear:both;"></div>
-		<br><br>						
-		<input type="hidden" name="a" value="edicionConvenio" />
-		<input type="hidden" name="i" value="<?php echo $idconvenio; ?>" />
-		<input type="hidden" name="statusConvenio_idstatusConvenio" value="1" /> <!-- convenio en proyecto -->
-		<?php	
-			if($convenio['idstatusConvenio']!=3) //Si ya se publico no hay cambios
-				echo '<input type="submit" value="Guardar cambios" class="botonRojo">';
+	</div>	
 
-			echo "<br><br>";
-			if($convenio['idstatusConvenio']>=2) //Si ya se firmo ya hay ahorradores en el padrón
-				echo '<input type="button" class="botonRojo" value="Generar base con folios finales" onclick="generaBaseCertificada(\''.md5($idconvenio).'\');" >';
-		?>						
-	</form>
+
+
+	<br><br>
+	<div class="separador"></div>
+	<br><br>					
+
+
+
+
+
+
+	<div class="tablaCentrada">	
+		<strong>RELACIÓN DE SOCIEDADES Y DOCUMENTOS</strong>
+		<br><br>
+
+		<?php
+			//TRAIGO TODAS LAS SOCIEDADES DEL CONVENIO
+			$sql="SELECT sociedad.* FROM sociedad INNER JOIN convenio_has_sociedad ON sociedad_idsociedad=idsociedad  WHERE convenio_idconvenio='".$convenio["idconvenio"]."'";
+			$res=mysql_query($sql);
+			while($sociedad=mysql_fetch_assoc($res)) //WHILE DE TODAS LAS SOCIEDADES DEL CONVENIO
+			{
+				?>
+					<div class="tablaCentrada">	
+
+						<span class="subTitulos"><?php echo $sociedad["clave"]." - ".$sociedad["nombre"]; ?></span><br><br>
+
+						<div class="mitadIzquierda">
+							<span class="subTitulos">Documentos relacionados</span><br>
+							<div class="cajonCuadroDocumentos" style="margin:0 !important;">
+								<?php
+									$sqlDocsSocConv="SELECT documentosValorAceptados FROM convenio_has_sociedad WHERE sociedad_idsociedad='".$sociedad["idsociedad"]."' AND convenio_idconvenio='".$convenio["idconvenio"]."'";
+									$resDocsSocConv=mysql_query($sqlDocsSocConv);
+									$filDocsSocConv=mysql_fetch_assoc($resDocsSocConv);
+									$documentosValorSociedad=explode(",",$filDocsSocConv["documentosValorAceptados"]);
+									$nombresDocumentosValor=Array();
+									$idDocumentosValor=Array();
+									foreach($documentosValorSociedad as $indice => $documentoValorSociedad)
+									{
+										$nombresDocumentosValor[]=dameNombreDocumentoValor($documentoValorSociedad);										
+										$idDocumentosValor[]=$documentoValorSociedad;
+									}
+									asort($nombresDocumentosValor);
+									echo "<ul>";
+									foreach($nombresDocumentosValor as $indice => $nombreDocumentoValor)
+										echo "<li>".$nombreDocumentoValor."</li>";
+									echo "</ul>";
+								?>
+							</div>
+						</div>
+
+						<div class="mitadDerecha">
+							<span class="subTitulos">Documentos para relacionar</span><br>
+							<div class="cajonCuadroDocumentos" style="margin:0 !important;">
+								<form action="./functions.php" method="post" >
+									<?php
+										$idDocumentosValor=implode(",",$idDocumentosValor);
+										$sqlDocsSocConvNA="SELECT iddocumentosValor FROM documentosValor INNER JOIN revisionesTemporales_has_documentosValor ON iddocumentosValor=documentosValor_iddocumentosValor WHERE revisionesTemporales_idrevisionesTemporales='".$idrevisionesTemporales."' AND iddocumentosValor NOT IN(".$idDocumentosValor.")";
+										$resDocsSocConvNA=mysql_query($sqlDocsSocConvNA);
+										$documentosValorSociedadNA=Array();
+										while($filDocsSocConvNA=mysql_fetch_assoc($resDocsSocConvNA))
+										{
+											$documentosValorSociedadNA[]=$filDocsSocConvNA["iddocumentosValor"];
+										}
+
+										$nombresDocumentosValorNA=Array();
+										foreach($documentosValorSociedadNA as $indice => $documentoValorSociedadNA)
+										{
+											$nombresDocumentosValorNA[$documentoValorSociedadNA]=dameNombreDocumentoValor($documentoValorSociedadNA);	
+										}
+
+										asort($nombresDocumentosValorNA);
+
+										echo "<ul>";
+										foreach($nombresDocumentosValorNA as $idDocumentoValorNA => $nombreDocumentoValorNA)
+										{
+											echo "<input type='checkbox' name='idDoc_".$idDocumentoValorNA."' value=''> ".$nombreDocumentoValorNA."<br>";
+										}
+										echo "</ul>";
+									?>
+									</div>
+									<br>
+									<input type="hidden" name="a" value="guardarRelacionSociedadDocumento" />
+									<input type="hidden" name="s" value="<?php echo $sociedad["idsociedad"]; ?>" />
+									<input type="hidden" name="i" value="<?php echo $convenio["idconvenio"]; ?>" />
+									<input type="submit" class="botonRojo" value="Guardar relación de documentos" />
+								</form>
+						</div>
+
+						<div style="clear:both;"></div>
+					</div>
+					<br><br>
+				<?php
+			}//FIN DEL WHILE DE TODAS LAS SOCIEDADES DEL CONVENIO
+		?>
+
+	</div>
+
+
+
+
+
+
+
+	<br><br>
+	<div class="separador"></div>
+	<br><br>					
+
 
 
 	
@@ -740,6 +862,50 @@ function formEdit()
 	</div>
 	<?php
 }
+
+
+
+
+	function guardarRelacionSociedadDocumento()
+	{
+		global $_REQUEST;
+		validarSession();
+		$link=conectDBReturn();
+
+		$idsociedad=$_REQUEST["s"];
+		$idconvenio=$_REQUEST["i"];
+
+		foreach($_REQUEST as $indice => $parametro)
+		{
+			if(strrpos($indice,"idDoc_")===false)
+			{}
+			else
+			{
+				$documento=explode("_",$indice);
+				$iddocumento=$documento[1];
+
+				//PRIMERO BUSCO SI EL documento YA ESTA EN LA TABLA convenio_has_sociedad
+				$sqlFind="SELECT COUNT(*) AS total FROM convenio_has_sociedad WHERE convenio_idconvenio='".$idconvenio."' AND sociedad_idsociedad='".$idsociedad."' AND (documentosValorAceptados LIKE '%,".$iddocumento."%' OR documentosValorAceptados LIKE '%".$iddocumento.",%' ) ";
+				$resFind=mysql_query($sqlFind);
+				$filFind=mysql_fetch_assoc($resFind);
+				if($filFind["total"]<=0)//METO EL NUEVO DOCUMENTO
+				{
+					$sqlInsert="UPDATE convenio_has_sociedad SET documentosValorAceptados=CONCAT(documentosValorAceptados,',','".$iddocumento."') WHERE convenio_idconvenio='".$idconvenio."' AND sociedad_idsociedad='".$idsociedad."'";
+					//echo $sqlInsert."<br>";
+					$resInsert=mysql_query($sqlInsert);
+					if(!$resInsert)
+					{
+						echo "error: <br>".$sqlInsert."<br>".mysql_error()."<br>";
+						die;
+					}
+				}
+			}
+		}
+		formEdit();
+	}
+
+
+
 
 
 
@@ -1983,7 +2149,7 @@ function formEdit()
 		imprimeCuadroAportaciones($revisionTemporal);
 		guardaLog(dameIdUserMd5($_SESSION["i"]),7,"convenio",$idconvenio);
 
-		//Reviso las sociedades
+		//REVISO LAS SOCIEDADES
 		$sociedades=dameTodasSociedadesRevision($revisionTemporal);
 		echo "<ol style='text-align:left;'>";
 			foreach($sociedades as $indice => $sociedad)
@@ -1992,9 +2158,9 @@ function formEdit()
 				//Busco si esa sociedad ya esta en el sistema
 				$sqlSoc="SELECT * FROM sociedad WHERE UPPER(nombre)='".strtoupper($sociedad)."'";
 				$resSoc=mysql_query($sqlSoc);
-				if(mysql_num_rows($resSoc)==0) //Doy de alta la sociedad 
+				if(mysql_num_rows($resSoc)==0) //DOY DE ALTA LA SOCIEDAD 
 				{
-					//Obtengo la última clave
+					//OBTENGO LA ÚLTIMA CLAVE
 					$sqlUlt="SELECT clave FROM sociedad ORDER BY idsociedad DESC LIMIT 1";
 					$resUlt=mysql_query($sqlUlt);
 					$filUlt=mysql_fetch_assoc($resUlt);
@@ -2007,8 +2173,9 @@ function formEdit()
 					$sqlConSoc="INSERT INTO convenio_has_sociedad (convenio_idconvenio,sociedad_idsociedad) VALUES ('".$idconvenio."','".$idNuevaSociedad."')";
 					$resConSoc=mysql_query($sqlConSoc);
 					echo "La sociedad <strong>".$sociedad."</strong> fue registrada en el catálogo de sociedades con la clave <strong>".$claveSoc."</strong>";
+
 				}
-				else
+				else //LA SOCIEDAD YA ESTABA REGISTRADA
 				{
 					$filSoc=mysql_fetch_assoc($resSoc);
 					$idNuevaSociedad=$filSoc["idsociedad"];
@@ -2017,8 +2184,31 @@ function formEdit()
 					echo "La sociedad <strong>".$sociedad."</strong> con la clave <strong>".$filSoc["clave"]."</strong> fue asociada al convenio";
 				}
 				echo "</li>";
+
+
+
+				//RELACIONO LA SOCIEDAD CON SUS DOCUMENTOS DE LA REVISION   $revisionTemporal  $sociedad $idconvenio//
+					//Traigos los documentos que en la revision temporal se asignaron
+					$sqlTem="SELECT documentosValor_iddocumentosValor FROM documentosValorSociedadesTemporales INNER JOIN  sociedadesTemporales ON sociedadesTemporales_idsociedadesTemporales=idsociedadesTemporales WHERE nombre='".$sociedad."' AND revisionesTemporales_idrevisionesTemporales='".$revisionTemporal."'";
+					$resTem=mysql_query($sqlTem);
+					$documentosRelacion=Array();
+					while($filTem=mysql_fetch_assoc($resTem))
+					{
+						$documentosRelacion[]=$filTem["documentosValor_iddocumentosValor"];
+						echo "&nbsp;&nbsp;Se relacionó con el documento <strong>".dameNombreDocumentoValor($filTem["documentosValor_iddocumentosValor"])."</strong><br>";
+					}
+					
+					$documentosRelacion=implode(",",$documentosRelacion);
+					$idSociedadFinal=dameIdSociedad($sociedad);
+					
+					$sqlInsRelSocCon="UPDATE convenio_has_sociedad SET documentosValorAceptados='".$documentosRelacion."' WHERE convenio_idconvenio='".$idconvenio."' AND sociedad_idsociedad='".$idSociedadFinal."'";
+					$resInsRelSocCon=mysql_query($sqlInsRelSocCon);
+				//FIN DE RELACIONO LA SOCIEDAD CON SUS DOCUMENTOS DE LA REVISION//
+
+
 			}
 		echo "</ol>";
+		//FIN DE REVISO LAS SOCIEDADES
 
 		echo '<input type="button" onclick="cargaModulo(\'conv\');" value="Siguiente" class="botonRojo">';
 	}
@@ -2123,6 +2313,49 @@ function formEdit()
 			$sql="DELETE FROM resumenCertificadas WHERE basesCertificadas_idbasesCertificadas='$idbasesCertificadas' AND idresumenCertificadas>'".$idFinal."'";
 			$res=mysql_query($sql);
 		}
+	}
+
+
+
+	function agregaDocuemntosConvenio()
+	{
+		global $_REQUEST;
+
+		$documentosValor=$_REQUEST["documentosValor"];
+		$iMd5=$_REQUEST["i"];
+		$errores=0;
+		
+		$idconvenio=dameIdConvenio($iMd5);
+		$idRevision=dameIdRevisionConvenio($idconvenio);
+
+		$documentosValor=explode(",",$documentosValor);
+
+		$sql=Array();
+		if(is_array($documentosValor)) //SI ELIGIO VARIOS DOCUMENTOS
+		{
+			foreach($documentosValor as $k => $idDocumento)
+			{
+				$sqls[]="INSERT INTO revisionesTemporales_has_documentosValor (revisionesTemporales_idrevisionesTemporales,documentosValor_iddocumentosValor) VALUES ('".$idRevision."','".$idDocumento."')";	
+			}
+		}
+		else //SI ELIGIO SOLO UN DOCUMENTO
+		{
+			$sqls[]="INSERT INTO revisionesTemporales_has_documentosValor (revisionesTemporales_idrevisionesTemporales,documentosValor_iddocumentosValor) VALUES ('".$idRevision."','".$documentosValor."')";	
+		}
+
+
+		foreach($sqls as $indice => $sql)
+		{
+			$res=mysql_query($sql);
+			if(!$res)
+				$errores++;
+		}
+		
+		if($errores==0)
+			echo "Los documentos fueron insertados correctamente";
+		else
+			echo "Ocurrio un error al insertar los documentos, contacte a su administrador";
+
 	}
 
 

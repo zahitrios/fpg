@@ -1,32 +1,32 @@
 .formularioUpload
 {
-	font-size:16px;
+  font-size:16px;
 }
 
 .mitadIzquierda
 {
-	text-align:left;
+  text-align:left;
 }
 
 .mitadDerecha
 {
-	text-align:left;
+  text-align:left;
 }
 
 #formTabs
 {
-	border-bottom: 1px solid #fb0001;
+  border-bottom: 1px solid #fb0001;
     padding-bottom: 3px;
 }
 
 .tablaCentrada
 {
-	font-size:16px;
+  font-size:16px;
 }
 
 .fieldsetZht
 {
-	width: 95%;
+  width: 95%;
     margin: 0 auto;
     border-color: #fb0001;
 }
@@ -34,44 +34,44 @@
 
 .fieldSetReporte
 {
-	text-align: left !important;
+  text-align: left !important;
 }
 
 .botonMostrar
 {
-	color: #fb0001;
-	font-size:12px;
-	margin-left:10px;
-	cursor:pointer;
+  color: #fb0001;
+  font-size:12px;
+  margin-left:10px;
+  cursor:pointer;
 }
 
 .oculta
 {
-	display:none;
+  display:none;
 }
 
 .exito
 {
-	color:#0a9621;
+  color:#0a9621;
 }
 
 .error
 {
-	color:#FF0000;
+  color:#FF0000;
 }
 
 table
 {
-	font-size:13px;
+  font-size:13px;
 }
 .negritas
 {
-	font-weight: bold;
+  font-weight: bold;
 }
 .bordeTabla
 {
-	border:1px solid #666666;
-	padding:4px;
+  border:1px solid #666666;
+  padding:4px;
 }
 
 /* Search, drag & drop list */
@@ -104,6 +104,7 @@ table
   width: 90%;
   max-width: 600px;
   white-space: nowrap;
+  margin: 0 auto;
 }
 
 .dd-list-container {
@@ -114,10 +115,11 @@ table
   padding: 0.5rem;
   border: 1px solid #999;
   margin-right: 2%;
+  height: 250px;
 }
 
 .dd-list-container:first-of-type {
-	margin-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
 .dd-list {
@@ -147,9 +149,9 @@ table
 }
 
 .dd-dest.clean:after {
-		position: absolute;
-		top: 0; right: 0; bottom: 0; left: 0;
-		margin: auto;
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    margin: auto;
     display: block;
     content: "Arrastra nuevos documentos aceptados aquí";
     padding: 0.5rem;

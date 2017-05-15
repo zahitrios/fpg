@@ -1289,6 +1289,44 @@
 		return $regresa;
 	}
 
+
+	function dameIdConvenio($idconvenioMd5)
+	{
+		$link="";
+		global $link;
+
+		$regresa="";
+		
+		$sql="SELECT idconvenio FROM convenio WHERE MD5(idconvenio)='".$idconvenioMd5."'";
+		
+
+		$res=mysql_query($sql);
+		$fil=mysql_fetch_assoc($res);
+
+		$regresa=$fil["idconvenio"];
+		
+		return $regresa;
+	}
+
+
+	function dameIdSociedad($nombreSociedad)
+	{
+		$link="";
+		global $link;
+
+		$regresa="";
+		
+		$sql="SELECT idsociedad FROM sociedad WHERE UPPER(nombre)='".strtoupper($nombreSociedad)."'";
+		
+
+		$res=mysql_query($sql);
+		$fil=mysql_fetch_assoc($res);
+
+		$regresa=$fil["idsociedad"];
+		
+		return $regresa;
+	}
+
 	function guardaErrorRevision($idrevisionesTemporales,$descripcion)
 	{
 		$link="";
