@@ -423,6 +423,7 @@
 			$erroresCabeceras++;
 			echo "<br><span class='error'>En la columna O no se encontró el número de solicitud de la modificación</span><br>";
 		}
+		
 
 
 		
@@ -823,13 +824,13 @@
 						{
 							$nombreEstado=dameNombreEstadoConvenio($fil["idconvenio"]);
 							$statusConvenio=dameStatusConvenio($fil["idconvenio"]);
-							echo "<option value='".$fil['idconvenio']."'>".$fil["idconvenio"]." - ".$nombreEstado." - ".$statusConvenio."</option>";
+							echo "<option value='".$fil['idconvenio']."'>".$fil["idconvenio"]." - ".$nombreEstado." - ".convierteTimeStampCorto($fil["fechaFirma"])." - ".$statusConvenio."</option>";
 						}
 					echo "</select>";
 
 				?>
 				<br>
-				Número de solicitud del archivo: <strong><?php $numeroSolicitud; ?></strong>
+				Número de solicitud del archivo: <strong><?php echo  $numeroSolicitud; ?></strong>
 				<br><br>
 			</fieldset>
 
@@ -1190,6 +1191,8 @@
 							$sql.=" AND folioIdentificador NOT IN(".$foliosNoEncontradosString.")";
 						
 
+
+
 						$res=mysql_query($sql);
 
 						$diferenciaMontoMaximoPagoConvenio=0;
@@ -1298,20 +1301,20 @@
 								$filP=mysql_fetch_assoc($resP);
 
 								$diferenciaMontoMaximoAhorrador=$montoMaximoCalculado-$filP["montoMaximo"];
-								echo "<br>La diferencia del ahorrador ".$filP["nombre"]." en el monto máximo de pago es de $ ".separarMiles($diferenciaMontoMaximoAhorrador);
+								echo "<br>La diferencia del ahorrador ".$filP["nombre"]." en el monto máximo de pago es de $ ".separarMiles(round($diferenciaMontoMaximoAhorrador,2));
 								$diferenciaMontoMaximoPagoConvenio=$diferenciaMontoMaximoPagoConvenio+$diferenciaMontoMaximoAhorrador;
 							}
 
 
 							if($modCon["observacionesDice"]=="ALTA")
 							{								
-								echo "<br>Se dará de alta el ahorrador ".$modCon["nombreAhorradorDice"]." con un monto máximo de pago de $ ".separarMiles($montoMaximoCalculado);
+								echo "<br>Se dará de alta el ahorrador ".$modCon["nombreAhorradorDebeDecir"]." con un monto máximo de pago de $ ".separarMiles(round($montoMaximoCalculado,2));
 								$diferenciaMontoMaximoPagoConvenio=$diferenciaMontoMaximoPagoConvenio+$montoMaximoCalculado;
 							}
 
 							if($modCon["observacionesDice"]=="BAJA")
 							{
-								echo "<br>Se dará de baja el ahorrador ".$modCon["nombreAhorradorDice"]." con un monto máximo de pago de $ ".separarMiles($montoMaximoCalculado);
+								echo "<br>Se dará de baja el ahorrador ".$modCon["nombreAhorradorDice"]." con un monto máximo de pago de $ ".separarMiles(round($montoMaximoCalculado,2));
 								$diferenciaMontoMaximoPagoConvenio=$diferenciaMontoMaximoPagoConvenio-$montoMaximoCalculado;
 							}
 
@@ -1872,7 +1875,7 @@
 				$folioIdentificador=$claveEstado.$claveSociedadFinal.$etapaConvenio.$consecutivoTexto;
 				
 				$sql="INSERT INTO ahorrador (folioIdentificador, nombre, montoAl100, montoAl70, montoMaximo, sca, sci, sps, sdg, scnc, spc, sod ) VALUES ('".$folioIdentificador."', '".$filMod["nombreAhorradorDebeDecir"]."', '".$filMod["saldoNeto100DebeDecir"]."', '".$filMod["saldoNeto70DebeDecir"]."', '".$filMod["montoMaximoPagoDebeDecir"]."', '".$filMod["cuentasDeAhorroDebeDecir"]."', '".$filMod["cuentaDeInversionDebeDecir"]."', '".$filMod["parteSocialDebeDecir"]."', '".$filMod["depositosEnGarantiaDebeDecir"]."', '".$filMod["chequesNoCobradosDebeDecir"]."', '".$filMod["prestamosACargoDebeDecir"]."', '".$filMod["otrosDepositosDebeDecir"]."') ";
-				echo "<br>INSERTANDO AL CONVENIO A: ".$filMod["nombreAhorradorDice"]." - ";
+				echo "<br>INSERTANDO AL CONVENIO A: ".$filMod["nombreAhorradorDebeDecir"]." - ";
 
 				if($res=mysql_query($sql))
 				{
