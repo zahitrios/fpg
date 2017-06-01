@@ -1,4 +1,4 @@
-var ruta="/~fipago/";
+//var ruta="/~fipago/";
 var ruta="/~dev/";
 
 function cargaModulo(modulo)

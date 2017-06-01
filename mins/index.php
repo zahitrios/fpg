@@ -749,6 +749,46 @@
 
 
 
+
+
+		//BUSCO FOLIOS YA MINISTRADOS//
+		$sqlFol="SELECT *  
+				FROM registrosMinistraciones 
+				WHERE  			
+				ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND 				
+				folioIdentificador IN(SELECT folioIdentificador FROM ahorrador INNER JOIN ahorradoresMinistrados ON idahorrador=ahorrador_idahorrador)";
+		$resFol=mysql_query($sqlFol);
+		echo "Folios ya ministrados: <strong>".mysql_num_rows($resFol)."</strong>";
+		if(mysql_num_rows($resFol)>0)
+		{
+			echo "<span class='botonMostrar' onclick='muestraOculta(\"divFoliosYaRepetidos\");' >Mostrar/Ocultar</span>";
+			echo "<div class='oculta' id='divFoliosYaRepetidos'>";						
+				echo "<ul>";									
+					while($filFol=mysql_fetch_assoc($resFol))
+					{
+						$cadenaError="El siguiente folio: <strong>".$filFol["folioIdentificador"]."</strong> ya se ha ministrado anteriormente y tiene un saldo pendiente de <strong>$ ".separarmiles(dameSaldoParaMinistrarAhorrador($filFol["folioIdentificador"]))."</strong>";
+						echo "<li><span class='error'>".$cadenaError."</span></li>";
+						guardaErrorMinistracion($idministracionesTemporales,$cadenaError);
+						$foliosMalos[]=$filFol["folioIdentificador"];							
+					}
+				echo "</ul>";
+			echo "</div>";
+		}		
+		echo "<br><br>";
+
+		//BUSCO FOLIOS YA MINISTRADOS//
+
+
+
+
+
+
+
+
+
+
+
+
 		//BUSCO QUE LOS NOMBRES SEAN LOS CORRECTOS DEL CONVENIO
 		$sqlFol="SELECT nombreAhorrador FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND nombreAhorrador NOT IN(SELECT nombre FROM ahorrador INNER JOIN convenio_has_ahorrador ON ahorrador_idahorrador=idahorrador WHERE convenio_idconvenio='".$idConvenio."')";
 		$resFol=mysql_query($sqlFol);
@@ -895,9 +935,15 @@
 
 
 		$totalErrores=dameTotalErroresRevisionMinistracion($idministracionesTemporales);
+
+
 		echo "Total de errores encontrados: ".$totalErrores."<br><br>";
 		if($totalErrores>0)
 		{
+			//MARCO LA MINISTRACIÓN COMO RECHAZADA
+			$sqlRchz="UPDATE ministracionesTemporales SET statusMinistracion_idstatusMinistracion=3 WHERE idministracionesTemporales='".$idministracionesTemporales."'";
+			$resRchz=mysql_query($sqlRchz);
+			//MARCO LA MINISTRACIÓN COMO RECHAZADA
 			?>
 			<br>
 			<input type="button" value="Regresar" class="botonRojoChico" onclick="cargaModulo('mins')">
@@ -913,7 +959,7 @@
 			<br>
 			<?php echo "<input type='hidden' name='idministracionesTemporales' value='".$idministracionesTemporales."'>"; ?>
 			<input type="hidden" name="a" value="aprobarMinistracion">
-			<input type="button" value="Cancelar" class="botonRojoChico" onclick="cargaModulo('mins')">
+			<input type="button" value="Cancelar" class="botonRojoChico"  onclick="cancelaMinistracion('<?php echo md5($idministracionesTemporales); ?>')">
 			&nbsp;&nbsp;
 			<input type="submit" value="Continuar" class="botonRojoChico" >
 			<br><br>
@@ -941,7 +987,7 @@ function aprobarMinistracion()
 	<form action="" method="post">
 		Al dar click en <strong>Continuar</strong> se procesará la ministración
 		<br><br>
-		<input type="button" value="Cancelar" class="botonRojoChico"  onclick="cargaModulo('mins')">
+		<input type="button" value="Cancelar" class="botonRojoChico"  onclick="cancelaMinistracion('<?php echo md5($idministracionesTemporales); ?>')">
 		&nbsp;&nbsp;&nbsp;
 		<input type="submit" value="Continuar" class="botonRojoChico" >
 		<input type="hidden" name="a" value="comienzaActualizaciones" />
@@ -961,6 +1007,7 @@ function comienzaActualizaciones()
 	$erroresMinistraciones=0;
 	$idministracionesTemporales=$_REQUEST["idministracionesTemporales"];
 	$totalMinistracion=0;
+	$totalAhorradoresMinistrados=0;
 
 	$sql="SELECT * FROM ministracionesTemporales WHERE idministracionesTemporales='".$idministracionesTemporales."'";
 	$res=mysql_query($sql);
@@ -1016,6 +1063,7 @@ function comienzaActualizaciones()
 		echo "<br><br>";
 
 		$totalMinistracion+=$solicitudMinistradoAhorrador;
+		$totalAhorradoresMinistrados++;
 	}
 	//REVISO TODOS LOS IMPORTES
 
@@ -1023,6 +1071,7 @@ function comienzaActualizaciones()
 	echo "<br><br>";
 	//RESUMEN FINAL DE LA MINISTRACION
 	echo "<strong>";
+	echo "TOTAL DE AHORRADORES MINISTRADOS: ".$totalAhorradoresMinistrados."<br>";
 	echo "TOTAL DE LA MINISTRACIÓN: $ ".separarMiles($totalMinistracion)."<br>";
 	echo "APORTACIÓN ESTATAL: $ ".separarMiles(round($totalMinistracion/2.75),2)."<br>";
 	echo "APORTACIÓN FEDERAL: $ ".separarMiles(round($totalMinistracion*1.75/2.75),2)."<br>";
@@ -1061,6 +1110,7 @@ function muestraResumenReporte()
 	global $_REQUEST,$mensaje;
 
 	$erroresTotalesReporte=0;
+	$totalAhorradoresMinistrados=0;
 
 	$idministracionesTemporales=$_REQUEST["idministracionesTemporales"];
 
@@ -1129,6 +1179,7 @@ function muestraResumenReporte()
 			echo "<br><br>";
 
 			$totalMinistracion+=$solicitudMinistradoAhorrador;
+			$totalAhorradoresMinistrados++;
 		}
 		//REVISO TODOS LOS IMPORTES
 
@@ -1137,6 +1188,7 @@ function muestraResumenReporte()
 		echo "<br><br>";
 		//RESUMEN FINAL DE LA MINISTRACION
 		echo "<strong>";
+		echo "TOTAL DE AHORRADORES MINISTRADOS: ".$totalAhorradoresMinistrados."<br>";
 		echo "TOTAL DE LA MINISTRACIÓN: $ ".separarMiles($totalMinistracion)."<br>";
 		echo "APORTACIÓN ESTATAL: $ ".separarMiles(round($totalMinistracion/2.75),2)."<br>";
 		echo "APORTACIÓN FEDERAL: $ ".separarMiles(round($totalMinistracion*1.75/2.75),2)."<br>";

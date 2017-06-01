@@ -12,6 +12,17 @@ function Handle_OnRowClick(sender,args)
 }
 
 
+function cancelaMinistracion(md5)
+{
+	var idministracionesTemporalesMd5=md5;
+
+	$.ajax({url: "functions.php?a=cancelaMinistracion&i="+idministracionesTemporalesMd5, success: function(result)
+    {   
+        alert(result);        
+    }});
+    cargaModulo('mins');
+}
+
 
 
 $(function() { //shorthand document.ready function

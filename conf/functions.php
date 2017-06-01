@@ -2067,6 +2067,28 @@
 		<?php
 	}
 
+
+
+
+	function ahorradorMinistrado($folioIdentificador)
+	{
+		global $link;
+		$sqlAhorrador="SELECT * FROM ahorrador WHERE folioIdentificador='".$folioIdentificador."'";
+		$resAhorrador=mysql_query($sqlAhorrador);
+		$filAhorrador=mysql_fetch_assoc($resAhorrador);
+
+		$sql="SELECT COUNT(*) AS total FROM ahorradoresMinistrados WHERE ahorrador_idahorrador='".$filAhorrador["idahorrador"]."'";
+		$res=mysql_query($sql);
+		$fil=mysql_fetch_assoc($res);
+		if($fil["total"]>0)
+			return true;
+		
+		return false;
+	}
+
+
+
+
 	function dameSaldoParaMinistrarAhorrador($folioIdentificador)
 	{
 		global $link;
