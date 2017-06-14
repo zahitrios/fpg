@@ -27,14 +27,14 @@
 	$link=conectDBReturn();
 	$ds = new MySQLDataSource($link);
 	
-	$ds->SelectCommand = "SELECT *  FROM documentosIdentidad  						
-						  ORDER BY iddocumentosIdentidad ASC";
-
-	$ds->UpdateCommand = "UPDATE documentosIdentidad SET nombre='@nombre' WHERE documentosIdentidad=@documentosIdentidad";
-	$ds->InsertCommand = "INSERT INTO documentosIdentidad (nombre) VALUES ('@nombre')";
+	$ds->SelectCommand = "SELECT tipoDocumentoIdentidad.descripcion,documentosIdentidad.nombre FROM documentosIdentidad 
+						INNER JOIN documentosIdentidad_has_tipoDocumentoIdentidad ON iddocumentosIdentidad=documentosIdentidad_iddocumentosIdentidad 
+						INNER JOIN tipoDocumentoIdentidad ON idtipoDocumentoIdentidad=tipoDocumentoIdentidad_idtipoDocumentoIdentidad 
+						ORDER BY iddocumentosIdentidad ASC";
+	//$ds->UpdateCommand = "UPDATE documentosIdentidad SET nombre='@nombre' WHERE documentosIdentidad=@documentosIdentidad";
+	//$ds->InsertCommand = "INSERT INTO documentosIdentidad (nombre) VALUES ('@nombre')";
  	
  	$grid = new KoolGrid("grid");
-
 
 	$grid->scriptFolder="../lib/KoolPHPSuite/KoolControls/KoolGrid";
 	$grid->styleFolder="../lib/KoolPHPSuite/KoolControls/KoolGrid/styles/office2010blue"; 
@@ -52,8 +52,7 @@
 	$grid->AllowResizing = true;
 	$grid->MasterTable->AllowFiltering = true;
 	$grid->MasterTable->ShowFunctionPanel = true;	
-	$grid->AutoGenerateEditColumn = true;
-
+	$grid->AutoGenerateEditColumn = false;
 
 	class MyGridEventHandler extends GridEventHandler
 	{
@@ -73,22 +72,67 @@
 			if($args["Successful"]==1)
 			{	
 				guardaLog(dameIdUserMd5($_SESSION["i"]),4,"documentos",$iddocumentos);
-			}
-			
+			}			
 		}
 	}
 	$grid->EventHandler = new MyGridEventHandler();
 
 
+ 	class MyInsertTemplate implements GridTemplate
+  	{
 
+	    function Render($_row)
+	    {
+	     	$KoolControlsFolder="../lib/KoolPHPSuite/KoolControls";
+	      
+	    	$html  = '<table align="left" style="width:49%; float:left; ">
+						<tr>
+							<td align="right">Nombre del documento:</td>
+							<td align="left" style="padding-left:10px;">
+								<input type="text" name="nombreDocumento" required>
+							</td>
+						</tr>
+	                </table>';
+	    $html  .= '	<table align="right" style="width:49%; float:right;">
+	      				<tr>
+	                    	<td align="right" valign="top">Tipo de acreditación:</td>
+	                    	<td align="left" style="padding-left:10px;">';
+	                    		$tiposAcreditacion=dameGridTable("tipoDocumentoIdentidad","idtipoDocumentoIdentidad");
+	                    		foreach($tiposAcreditacion as $indice => $registro)
+	                    			$html.='<input type="checkbox" name="tipoDocumento[]" value="'.$registro["idtipoDocumentoIdentidad"].'"> &nbsp;'.$registro["descripcion"].'<br>';                    		
+	    $html.= '			</td>
+	                  	</tr>
+	                  	<tr>
+	                    	<td colspan="2" align="center" style="padding-top:10px;">
+	                      		 <input type="button" value="Cancelar" onclick="grid_cancel_insert(this)" />&nbsp;&nbsp;
+	                      		<input type="button" value="Aceptar" onclick="grid_confirm_insert(this)" />
+	                    	</td>
+	                  	</tr>
+	                </table>
+	                <div style="clear:both;"></div>';
 
-	
-	$column = new GridBoundColumn();
-	$column->HeaderText = "Id";
-	$column->DataField = "iddocumentosIdentidad";
-	$column->ReadOnly = true;
-	$column->Width = "50px";
-	$grid->MasterTable->AddColumn($column);
+	      return $html;
+	    }
+
+	    function GetData($_row)
+	    {
+	        $documento=$_POST["nombreDocumento"];
+
+	        $sqlIn="INSERT INTO documentosIdentidad (nombre) VALUES ('".$documento."')";
+	        $resIn=mysql_query($sqlIn);
+	        $iddocumentosIdentidad=mysql_insert_id();
+
+	        foreach($_POST['tipoDocumento'] as $selected)
+	        {
+	        	$sqlRel="INSERT INTO documentosIdentidad_has_tipoDocumentoIdentidad (documentosIdentidad_iddocumentosIdentidad,tipoDocumentoIdentidad_idtipoDocumentoIdentidad) VALUES ('".$iddocumentosIdentidad."','".$selected."')";
+	        	$resRel=mysql_query($sqlRel);
+	        }
+	        // return array("nombreDocumento"=>$documento,"tipoDocumento"=>$tipoDocumento);
+	    }   
+  	}
+  
+  	$grid->MasterTable->InsertSettings->Mode = "Template";
+  	$grid->MasterTable->InsertSettings->Template = new MyInsertTemplate();
 
 
 	$column = new GridBoundColumn();
@@ -97,6 +141,11 @@
 	$grid->MasterTable->AddColumn($column);
 
 
+
+	$column = new GridBoundColumn();
+	$column->HeaderText = "Acredita";
+	$column->DataField = "descripcion";
+	$grid->MasterTable->AddColumn($column);
 
 
 	if(isset($_POST["IgnorePaging"]))

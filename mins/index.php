@@ -752,30 +752,20 @@
 
 
 		//BUSCO FOLIOS YA MINISTRADOS//
-		$sqlFol="SELECT *  
-				FROM registrosMinistraciones 
-				WHERE  			
-				ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND 				
-				folioIdentificador IN(SELECT folioIdentificador FROM ahorrador INNER JOIN ahorradoresMinistrados ON idahorrador=ahorrador_idahorrador)";
+		$sqlFol="SELECT * FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."'";
 		$resFol=mysql_query($sqlFol);
-		echo "Folios ya ministrados: <strong>".mysql_num_rows($resFol)."</strong>";
-		if(mysql_num_rows($resFol)>0)
+		while($filFol=mysql_fetch_assoc($resFol))
 		{
-			echo "<span class='botonMostrar' onclick='muestraOculta(\"divFoliosYaRepetidos\");' >Mostrar/Ocultar</span>";
-			echo "<div class='oculta' id='divFoliosYaRepetidos'>";						
-				echo "<ul>";									
-					while($filFol=mysql_fetch_assoc($resFol))
-					{
-						$cadenaError="El siguiente folio: <strong>".$filFol["folioIdentificador"]."</strong> ya se ha ministrado anteriormente y tiene un saldo pendiente de <strong>$ ".separarmiles(dameSaldoParaMinistrarAhorrador($filFol["folioIdentificador"]))."</strong>";
-						echo "<li><span class='error'>".$cadenaError."</span></li>";
-						guardaErrorMinistracion($idministracionesTemporales,$cadenaError);
-						$foliosMalos[]=$filFol["folioIdentificador"];							
-					}
-				echo "</ul>";
-			echo "</div>";
-		}		
+			$saldoPendiente=dameSaldoParaMinistrarAhorrador($filFol["folioIdentificador"]);
+			if(round($saldoPendiente,2)<round($filFol["montoMinistrar"],2))
+			{
+				$cadenaError="El siguiente folio: <strong>".$filFol["folioIdentificador"]."</strong> tiene un saldo pendiente de <strong>$ ".separarMiles(round($saldoPendiente,2))."</strong> y el archivo indica <strong>$ ".separarMiles(round($filFol["montoMinistrar"],2))."</strong>";
+				echo "<span class='error'>".$cadenaError."</span><br>";
+				guardaErrorMinistracion($idministracionesTemporales,$cadenaError);
+				$foliosMalos[]=$filFol["folioIdentificador"];
+			}
+		}
 		echo "<br><br>";
-
 		//BUSCO FOLIOS YA MINISTRADOS//
 
 
@@ -844,24 +834,24 @@
 
 
 
-		// VERIFICO QUE EL MONTO A MINISTRAR SEA EL 70%$sqlFol="SELECT *,(parteSocial+cuentasAhorro+cuentasInversion+depositosGarantia+chequesNoCobrados+otrosDepositos+prestamosCargo) AS suma FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND folioIdentificador NOT IN(".implode(",",$foliosMalos).") AND (parteSocial+cuentasAhorro+cuentasInversion+depositosGarantia+chequesNoCobrados+otrosDepositos+prestamosCargo) <> saldoTotal"; 
-		$sqlFol="SELECT *,ROUND((saldoTotal*0.70),2) AS paraMinistrar FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND folioIdentificador NOT IN(".implode(",",$foliosMalos).") AND ROUND((saldoTotal*0.70),2) <> montoMinistrar"; 
+		// VERIFICO QUE EL MONTO A MINISTRAR SEA EL 70%
+		$sqlFol="SELECT *,ROUND((parteSocial+cuentasAhorro+cuentasInversion+depositosGarantia+chequesNoCobrados+otrosDepositos-prestamosCargo)*0.70,2) AS suma FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND folioIdentificador NOT IN(".implode(",",$foliosMalos).") "; 
+		//$sqlFol="SELECT *,ROUND((saldoTotal*0.70),2) AS paraMinistrar FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND folioIdentificador NOT IN(".implode(",",$foliosMalos).") AND ROUND((saldoTotal*0.70),2) <> montoMinistrar"; 
 		$resFol=mysql_query($sqlFol);
-		echo "Motos para ministrar mal calculados por ahorrador: <strong>".mysql_num_rows($resFol)."</strong>";
-		if(mysql_num_rows($resFol)>0)
+		while($filFol=mysql_fetch_assoc($resFol))
 		{
-			echo "<span class='botonMostrar' onclick='muestraOculta(\"divMontosMinistrarMalCalculados\");' >Mostrar/Ocultar</span>";
-			echo "<div class='oculta' id='divMontosMinistrarMalCalculados'>";						
-				echo "<ul>";									
-					while($filFol=mysql_fetch_assoc($resFol))
-					{
-						$cadenaError="El monto para ministrar del ahorrador: <strong>".$filFol["nombreAhorrador"]."</strong> debe ser <strong>$ ".separarMiles($filFol["paraMinistrar"])."</strong> y el archivo indica <strong>$ ".separarMiles($filFol["montoMinistrar"])."</strong> ";
-						echo "<li><span class='error'>".$cadenaError."</span></li>";
-						guardaErrorMinistracion($idministracionesTemporales,$cadenaError);
-						$foliosMalos[]=$filFol["folioIdentificador"];
-					}
-				echo "</ul>";
-			echo "</div>";
+			$montoCalculado=$filFol["suma"];
+			if($montoCalculado>MONTO_MAXIMO_PAGO_70)
+				$montoCalculado=MONTO_MAXIMO_PAGO_70;
+
+
+			if($montoCalculado!=$filFol["montoMinistrar"])
+			{	
+				$cadenaError="El monto para ministrar del ahorrador: <strong>".$filFol["nombreAhorrador"]."</strong> debe ser <strong>$ ".separarMiles($montoCalculado)."</strong> y el archivo indica <strong>$ ".separarMiles($filFol["montoMinistrar"])."</strong> ";
+				echo "<span class='error'>".$cadenaError."</span><br>";
+				guardaErrorMinistracion($idministracionesTemporales,$cadenaError);
+				$foliosMalos[]=$filFol["folioIdentificador"];
+			}
 		}
 		// VERIFICO QUE EL MONTO A MINISTRAR SEA EL 70%
 		echo "<br><br>";

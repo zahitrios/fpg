@@ -17,8 +17,7 @@
   $link=conectDBReturn();
   $ds = new MySQLDataSource($link);
   
-  $ds->SelectCommand = "SELECT *,CONCAT(estado.nombre,' - ',DATE_FORMAT(convenio.fechaFirma,'%c %b, %Y')) AS descripcionConvenio  FROM capacitacion 
-                    INNER JOIN convenio ON idconvenio=convenio_idconvenio INNER JOIN estado ON idestado=estado_idestado";
+  $ds->SelectCommand = "SELECT *,CONCAT(estado.nombre,' - ',DATE_FORMAT(convenio.fechaFirma,'%c %b, %Y')) AS descripcionConvenio  FROM capacitacion INNER JOIN convenio ON idconvenio=convenio_idconvenio INNER JOIN estado ON idestado=estado_idestado";
 
   $ds->UpdateCommand = "UPDATE capacitacion SET fechaInicio='@fechaInicio', fechaFinalizacion='@fechaFinalizacion', sede='@sede', capacitadores='@capacitadores', noAsistentes='@noAsistentes' WHERE idcapacitacion=@idcapacitacion";
   // $ds->DeleteCommand = "DELETE FROM capacitacion WHERE idcapacitacion=@idcapacitacion";

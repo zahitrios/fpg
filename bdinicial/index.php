@@ -1654,6 +1654,7 @@
 						foreach($camposDoblesEspacios as $k => $campo)
 						{							
 							$sql="SELECT COUNT(*) AS total FROM consolidadasTemporales WHERE ".$campo." regexp '[^a-zA-Z0-9\ \ñ\Ñ\/ ]' AND revisionesTemporales_idrevisionesTemporales='".$idrevisionesTemporales."'";
+							//SELECT COUNT(*) AS total FROM consolidadasTemporales WHERE nombreAhorrador regexp'[^a-zA-Z0-9\ \ñ\Ñ\/ ]' AND revisionesTemporales_idrevisionesTemporales='1'
 							$res=mysql_query($sql);
 							$fil=mysql_fetch_assoc($res);
 							echo "Caracteres especiales en el campo ".$leyendasDoblesEspacios[$k]." : <strong>".$fil["total"]."</strong>";

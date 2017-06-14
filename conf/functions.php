@@ -1747,6 +1747,22 @@
 
 	}
 
+
+
+
+	function dameArchivoModificacion($idmodificaciones)
+	{
+		$sql="SELECT archivo FROM modificaciones WHERE idmodificaciones='".$idmodificaciones."'";
+		$res=mysql_query($sql);
+		$fil=mysql_fetch_assoc($res);
+
+		return $fil["archivo"];
+	}
+
+
+
+
+
 	function dameIdRevisionConvenio($idconvenio)
 	{
 		$sql="SELECT revisionesTemporales_idrevisionesTemporales FROM convenio WHERE idconvenio='".$idconvenio."'";
@@ -1883,9 +1899,37 @@
 			$indice++;
 		}
 
-		return $regresa;
-		
+		return $regresa;		
 	}
+	function dameIdDocumentosIdentidad($idConvenio)
+	{
+		global $_REQUEST,$mensaje;
+		
+		$sqlDocs="SELECT iddocumentosIdentidad_has_tipoDocumentoIdentidadcol,documentosIdentidad.nombre,tipoDocumentoIdentidad.descripcion FROM 
+				convenio INNER JOIN convenio_has_documentosIdentidad_has_tipoDocumentoIdentidad ON convenio_idconvenio=idconvenio 
+				INNER JOIN documentosIdentidad_has_tipoDocumentoIdentidad ON iddocumentosIdentidad_has_tipoDocumentoIdentidadcol=has_iddocumentosIdentidad_has_tipoDocumentoIdentidadcol 
+				INNER JOIN tipoDocumentoIdentidad ON idtipoDocumentoIdentidad=tipoDocumentoIdentidad_idtipoDocumentoIdentidad 
+				INNER JOIN documentosIdentidad ON iddocumentosIdentidad=documentosIdentidad_iddocumentosIdentidad  
+				WHERE has_iddocumentosIdentidad_has_tipoDocumentoIdentidadcol IN(SELECT has_iddocumentosIdentidad_has_tipoDocumentoIdentidadcol FROM convenio_has_documentosIdentidad_has_tipoDocumentoIdentidad WHERE convenio_idconvenio='".$idConvenio."') ORDER BY nombre ASC";
+		
+		$resDocs=mysql_query($sqlDocs);
+		$indice=0;
+		while($filDocs=mysql_fetch_assoc($resDocs))
+		{
+			$regresa[$indice][0]=$filDocs["iddocumentosIdentidad_has_tipoDocumentoIdentidadcol"];
+			$regresa[$indice][1]=$filDocs["nombre"];
+			$regresa[$indice][2]=$filDocs["descripcion"];
+
+			$indice++;
+		}
+
+		return $regresa;		
+	}
+
+
+
+
+
 
 	function dameIdDocumentosSinAgregar($idrevisionesTemporales)
 	{
@@ -1902,10 +1946,32 @@
 
 			$indice++;
 		}
-
-		return $regresa;
-		
+		return $regresa;		
 	}
+	function dameIdDocumentosIdentidadSinAgregar($idConvenio)
+	{
+		global $_REQUEST,$mensaje;
+		
+		$sqlDocs="SELECT iddocumentosIdentidad_has_tipoDocumentoIdentidadcol,documentosIdentidad.nombre,tipoDocumentoIdentidad.descripcion FROM 
+				documentosIdentidad_has_tipoDocumentoIdentidad 
+				INNER JOIN tipoDocumentoIdentidad ON idtipoDocumentoIdentidad=tipoDocumentoIdentidad_idtipoDocumentoIdentidad 
+				INNER JOIN documentosIdentidad ON iddocumentosIdentidad=documentosIdentidad_iddocumentosIdentidad  
+				WHERE iddocumentosIdentidad_has_tipoDocumentoIdentidadcol NOT IN(SELECT has_iddocumentosIdentidad_has_tipoDocumentoIdentidadcol FROM convenio_has_documentosIdentidad_has_tipoDocumentoIdentidad WHERE convenio_idconvenio='".$idConvenio."') ORDER BY nombre ASC";
+		
+		
+		$resDocs=mysql_query($sqlDocs);
+		$indice=0;
+		while($filDocs=mysql_fetch_assoc($resDocs))
+		{
+			$regresa[$indice][0]=$filDocs["iddocumentosIdentidad_has_tipoDocumentoIdentidadcol"];
+			$regresa[$indice][1]=$filDocs["nombre"];
+			$regresa[$indice][2]=$filDocs["descripcion"];
+
+			$indice++;
+		}
+		return $regresa;		
+	}
+
 
 
 

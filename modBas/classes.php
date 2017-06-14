@@ -82,5 +82,34 @@
 	}
 
 
+	function dameUltimaFilaArchivo($file,$hoja)
+	{
+		$reader = ReaderFactory::create(Type::XLSX); 
+		$reader->open($file);
+		$regresa=Array();
+
+		foreach ($reader->getSheetIterator() as $sheet) 
+		{
+			$sheetName = $sheet->getName();
+			
+			if($sheetName==$hoja)
+			{
+				foreach ($sheet->getRowIterator() as $row) 
+			    {	
+		    		foreach($row as $k => $v)
+			        {	
+			        	if(strtoupper(trim($v[3]))=="TOTAL DICE:")
+			        		$regresa["dice"]=$v;
+			        	if(strtoupper(trim($v[3]))=="TOTAL DEBE DECIR:")
+			        		$regresa["debeDecir"]=$v;
+			        }
+			    }
+			}
+		}
+		$reader->close();
+
+		return $regresa;
+	}
+
 
 ?>

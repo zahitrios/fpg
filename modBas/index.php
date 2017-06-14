@@ -1020,24 +1020,29 @@
 		if($hojaConsolidada!="")
 		{				
 			echo "Leyendo las modificaciones a la base consolidada, hoja <strong>".$hojaConsolidada."</strong> <br>";
-			$registros=insertRegistrosModificaciones($file,$hojaConsolidada,$filaConsolidada,$filaConsolidada2);
+			$registros=insertRegistrosModificaciones($file,$hojaConsolidada,$filaConsolidada,$filaConsolidada2+2);
 
 			$contador=1;
 			$registroCompleto=Array();
 			$registroFinal=Array();
 			foreach($registros as $indice => $registro)
 			{			
-				if($contador%2!=0) //Impar	
+				if($contador%2!=0) //IMPAR	
 				{				
 					$registroCompleto[0]=$registro;
 				}
 				
-				else //Par
+				else //PAR
 				{
 					$registroCompleto[1]=$registro;
-					
-					$sqlInsert="INSERT INTO modificacionesConsolidada (modificaciones_idmodificaciones, folioIdentificador, nombreAhorradorDice, nombreAhorradorDebeDecir, curpDice, curpDebeDecir, parteSocialDice, parteSocialDebeDecir, cuentasDeAhorroDice, cuentasDeAhorroDebeDecir, cuentaDeInversionDice, cuentaDeInversionDebeDecir, depositosEnGarantiaDice, depositosEnGarantiaDebeDecir, chequesNoCobradosDice, chequesNoCobradosDebeDecir, otrosDepositosDice, otrosDepositosDebeDecir, prestamosACargoDice, prestamosACargoDebeDecir, saldoNeto100Dice, saldoNeto100DebeDecir, saldoNeto70Dice, saldoNeto70DebeDecir, montoMaximoPagoDice, montoMaximoPagoDebeDecir, observacionesDice, observacionesDebeDecir, filaOriginalDocumento ) VALUES ('".$idmodificaciones."', '".$registroCompleto[0][2]."', '".$registroCompleto[0][3]."', '".$registroCompleto[1][3]."', '".$registroCompleto[0][4]."', '".$registroCompleto[1][4]."', '".$registroCompleto[0][5]."', '".$registroCompleto[1][5]."', '".$registroCompleto[0][6]."', '".$registroCompleto[1][6]."', '".$registroCompleto[0][7]."', '".$registroCompleto[1][7]."', '".$registroCompleto[0][8]."', '".$registroCompleto[1][8]."', '".$registroCompleto[0][9]."', '".$registroCompleto[1][9]."', '".$registroCompleto[0][10]."', '".$registroCompleto[1][10]."', '".$registroCompleto[0][11]."', '".$registroCompleto[1][11]."', '".$registroCompleto[0][12]."', '".$registroCompleto[1][12]."', '".$registroCompleto[0][13]."', '".$registroCompleto[1][13]."', '".$registroCompleto[0][14]."', '".$registroCompleto[1][14]."', '".$registroCompleto[0][15]."', '".$registroCompleto[1][15]."', '".$registroCompleto[0][count($registroCompleto)-1]."')"; 
-					$resInsert=mysql_query($sqlInsert);
+
+					// echo "<pre>";
+					// 	print_r($registroCompleto[0]);
+					// echo "</pre>";
+					// die;
+
+ 					$sqlInsert="INSERT INTO modificacionesConsolidada (modificaciones_idmodificaciones, consecutivo, folioIdentificador, nombreAhorradorDice, nombreAhorradorDebeDecir, curpDice, curpDebeDecir, parteSocialDice, parteSocialDebeDecir, cuentasDeAhorroDice, cuentasDeAhorroDebeDecir, cuentaDeInversionDice, cuentaDeInversionDebeDecir, depositosEnGarantiaDice, depositosEnGarantiaDebeDecir, chequesNoCobradosDice, chequesNoCobradosDebeDecir, otrosDepositosDice, otrosDepositosDebeDecir, prestamosACargoDice, prestamosACargoDebeDecir, saldoNeto100Dice, saldoNeto100DebeDecir, saldoNeto70Dice, saldoNeto70DebeDecir, montoMaximoPagoDice, montoMaximoPagoDebeDecir, observacionesDice, observacionesDebeDecir, filaOriginalDocumento ) VALUES ('".$idmodificaciones."', '".$registroCompleto[0][1]."', '".$registroCompleto[0][2]."', '".$registroCompleto[0][3]."', '".$registroCompleto[1][3]."', '".$registroCompleto[0][4]."', '".$registroCompleto[1][4]."', '".$registroCompleto[0][5]."', '".$registroCompleto[1][5]."', '".$registroCompleto[0][6]."', '".$registroCompleto[1][6]."', '".$registroCompleto[0][7]."', '".$registroCompleto[1][7]."', '".$registroCompleto[0][8]."', '".$registroCompleto[1][8]."', '".$registroCompleto[0][9]."', '".$registroCompleto[1][9]."', '".$registroCompleto[0][10]."', '".$registroCompleto[1][10]."', '".$registroCompleto[0][11]."', '".$registroCompleto[1][11]."', '".$registroCompleto[0][12]."', '".$registroCompleto[1][12]."', '".$registroCompleto[0][13]."', '".$registroCompleto[1][13]."', '".$registroCompleto[0][14]."', '".$registroCompleto[1][14]."', '".$registroCompleto[0][15]."', '".$registroCompleto[1][15]."', '".$registroCompleto[0][count($registroCompleto[0])-1]."')";
+					 $resInsert=mysql_query($sqlInsert);
 				    if(!$resInsert)
 				    {
 				    	echo "error:<br><br>".$sqlInsert."<br><br>".mysql_error()."<br><br>";
@@ -1056,7 +1061,7 @@
 		if($hojaAnalitica!="")
 		{			
 			echo "Leyendo la base analítica, hoja <strong>".$hojaAnalitica."</strong> <br>";			
-			$registros=insertRegistrosModificaciones($file,$hojaAnalitica,$filaAnalitica,$filaAnalitica2);
+			$registros=insertRegistrosModificaciones($file,$hojaAnalitica,$filaAnalitica,$filaAnalitica2+2);
 
 			foreach($registros as $indice => $registro)
 			{	
@@ -1150,9 +1155,72 @@
 
 						$foliosNoEncontrados=Array();
 
+
+
+
+						// BUSCO CARACTERES ESPECIALES //
+						$camposDoblesEspacios=Array("nombreAhorradorDebeDecir","curpDebeDecir");
+						$leyendasDoblesEspacios=Array("Nombre del ahorrador debe decir","CURP debe decir");
+						foreach($camposDoblesEspacios as $k => $campo)
+						{							
+							$sql="SELECT * FROM modificacionesConsolidada WHERE ".$campo." regexp '[^a-zA-Z0-9\ \ñ\Ñ\/ ]' AND modificaciones_idmodificaciones='".$idmodificaciones."' AND UPPER(nombreAhorradorDice) NOT LIKE 'TOTAL%'";
+							$res=mysql_query($sql);							
+							echo "Caracteres especiales en el campo ".$leyendasDoblesEspacios[$k]." : <strong>".mysql_num_rows($res)."</strong>";
+							if(mysql_num_rows($res)>0)
+							{
+								echo "<span class='botonMostrar' onclick='muestraOculta(\"divCaracteresEspecialesConsolidada".$k."\");' >Mostrar/Ocultar</span>";
+
+								echo "<div class='oculta' id='divCaracteresEspecialesConsolidada".$k."'>";
+									echo "<ul>";									
+									$res=mysql_query($sql);
+									while($fil=mysql_fetch_assoc($res))
+									{
+										$cadenaError="Se encontraron caracteres especiales en el campo <strong>".$leyendasDoblesEspacios[$k]."</strong>: <span class=\"error\">".addslashes($fil[$campo])."</span>";
+										echo "<li>".$cadenaError."</li>";
+										guardaErrorModificacion($idmodificaciones,$cadenaError);
+									}
+									echo "</ul>";
+								echo "</div>";
+							}
+
+							echo "<br><br>";
+						}
+						//FIN BUSCO CARACTERES ESPECIALES //
+
+
+
+
+
+
+						//VALIDO EL CONSECUTIVO
+						$consecutivo=1;
+						$sqlCon="SELECT consecutivo,filaOriginalDocumento FROM modificacionesConsolidada WHERE UPPER(nombreAhorradorDice) NOT LIKE 'TOTAL%' AND modificaciones_idmodificaciones='".$idmodificaciones."' ORDER BY 	idmodificacionesConsolidada ASC ";
+						//echo $sqlCon."<br>";
+						$resCon=mysql_query($sqlCon);
+						while($filCon=mysql_fetch_assoc($resCon))
+						{
+							if($filCon["consecutivo"]!=$consecutivo)
+							{
+								$cadenaError="El consecutivo <strong>".$filCon["consecutivo"]."</strong> rompe con la secuencia en la fila <strong>".$filCon["filaOriginalDocumento"]." </strong>";
+								echo "<span class='error'>".$cadenaError."</span><br>";
+								guardaErrorModificacion($idmodificaciones,$cadenaError);
+							}
+
+							$consecutivo++;
+						}
+						//VALIDO EL CONSECUTIVO
+						echo "<br><br>";
+
+
+
+
+
+
+
+
+
 						//BUSCO QUE LOS FOLIOS QUE NO ESTEN EN EL CONVENIO
 						$sql="SELECT folioIdentificador FROM modificacionesConsolidada WHERE UPPER(observacionesDice)<>'ALTA' AND folioIdentificador NOT IN(SELECT folioIdentificador FROM ahorrador INNER JOIN convenio_has_ahorrador ON idahorrador=ahorrador_idahorrador WHERE convenio_idconvenio='".$idconvenio."') AND modificaciones_idmodificaciones='".$idmodificaciones."' AND folioIdentificador<>''";
-						
 						$res=mysql_query($sql);
 						echo "Folios no econtrados en el convenio: ".mysql_num_rows($res);						
 						if(mysql_num_rows($res)>0)
@@ -1173,10 +1241,37 @@
 
 							guardaErrorModificacion($idmodificaciones,$cadenaError);
 						}
+						//FIN BUSCO QUE LOS FOLIOS QUE NO ESTEN EN EL CONVENIO
+						echo "<br><br>";
 
 
 
 
+
+					//VALIDO LAS SUMAS VERTICALES BIEN CALCULADAS//
+					$leyendasImportes=array("parteSocialDice"=>"dice en parte social", "parteSocialDebeDecir"=>"debe decir en parte social", "cuentasDeAhorroDice"=>"dice en cuentas de ahorro", "cuentasDeAhorroDebeDecir"=>"debe decir en cuentas de ahorro", "cuentaDeInversionDice"=>"dice en cuentas de inversión", "cuentaDeInversionDebeDecir"=>"debe decir en cuentas de inversión", "depositosEnGarantiaDice"=>"dice en depósitos en garantía", "depositosEnGarantiaDebeDecir"=>"debe decir en depósitos en garantía", "chequesNoCobradosDice"=>"dice en cheques no cobrados", "chequesNoCobradosDebeDecir"=>"debe decir en cheques no cobrados", "otrosDepositosDice"=>"dice en otros depósitos", "otrosDepositosDebeDecir"=>"debe decir en otros depósitos", "prestamosACargoDice"=>"dice en préstamos a cargo", "prestamosACargoDebeDecir"=>"debe decir en préstamos a cargo", "saldoNeto100Dice"=>"dice en saldo neto al 100%", "saldoNeto100DebeDecir"=>"debe decir en saldo neto al 100%", "saldoNeto70Dice"=>"dice en saldo neto al 70%", "saldoNeto70DebeDecir"=>"debe decir en saldo neto al 70%", "montoMaximoPagoDice"=>"dice en monto máximo de pago", "montoMaximoPagoDebeDecir"=>"debe decir en monto máximo de pago");
+					
+					$sqlArch="SELECT * FROM modificacionesConsolidada WHERE UPPER(nombreAhorradorDice) LIKE 'TOTAL%' AND modificaciones_idmodificaciones='".$idmodificaciones."'";
+					$resArch=mysql_query($sqlArch);
+					$filArch=mysql_fetch_assoc($resArch);
+
+					$sqlSumas="SELECT ROUND(SUM(parteSocialDice),2) AS parteSocialDice , ROUND(SUM(parteSocialDebeDecir),2) AS parteSocialDebeDecir, ROUND(SUM(cuentasDeAhorroDice),2) AS cuentasDeAhorroDice, ROUND(SUM(cuentasDeAhorroDebeDecir),2) AS cuentasDeAhorroDebeDecir, ROUND(SUM(cuentaDeInversionDice),2) AS cuentaDeInversionDice, ROUND(SUM(cuentaDeInversionDebeDecir),2) AS cuentaDeInversionDebeDecir, ROUND(SUM(depositosEnGarantiaDice),2) AS depositosEnGarantiaDice, ROUND(SUM(depositosEnGarantiaDebeDecir),2) AS depositosEnGarantiaDebeDecir, ROUND(SUM(chequesNoCobradosDice),2) AS chequesNoCobradosDice, ROUND(SUM(chequesNoCobradosDebeDecir),2) AS chequesNoCobradosDebeDecir, ROUND(SUM(otrosDepositosDice),2) AS otrosDepositosDice, ROUND(SUM(otrosDepositosDebeDecir),2) AS otrosDepositosDebeDecir, ROUND(SUM(prestamosACargoDice),2) AS prestamosACargoDice, ROUND(SUM(prestamosACargoDebeDecir),2) AS prestamosACargoDebeDecir, ROUND(SUM(saldoNeto100Dice),2) AS saldoNeto100Dice, ROUND(SUM(saldoNeto100DebeDecir),2) AS saldoNeto100DebeDecir, ROUND(SUM(saldoNeto70Dice),2) AS saldoNeto70Dice, ROUND(SUM(saldoNeto70DebeDecir),2) AS saldoNeto70DebeDecir, ROUND(SUM(montoMaximoPagoDice),2) AS montoMaximoPagoDice, ROUND(SUM(montoMaximoPagoDebeDecir),2) AS montoMaximoPagoDebeDecir FROM modificacionesConsolidada WHERE nombreAhorradorDice NOT LIKE 'TOTAL%' AND modificaciones_idmodificaciones='".$idmodificaciones."'";
+					$resSumas=mysql_query($sqlSumas);
+					$filSumas=mysql_fetch_assoc($resSumas);
+
+					foreach($filSumas as $campo => $valor)
+					{
+						if($filArch[$campo]!=$valor)
+						{
+							$cadenaError="La suma calculada de todos los registros en el campo  ".$leyendasImportes[$campo]." de la base consolidada es $ ".separarMiles($valor)." y el archivo dice $ ".separarMiles($filArch[$campo]);
+							echo "<span class='error'>".$cadenaError."</span><br>";
+							guardaErrorModificacion($idmodificaciones,$cadenaError);
+						}
+					}
+					//FIN VALIDO LAS SUMAS VERTICALES BIEN CALCULADAS//
+
+					
+				
 
 
 
@@ -1184,13 +1279,12 @@
 
 						echo "<br><br>";
 						//RECORRO TODA LA CONSOLIDADA
-						$sql="SELECT * FROM modificacionesConsolidada WHERE modificaciones_idmodificaciones='".$idmodificaciones."'";
+						$sql="SELECT * FROM modificacionesConsolidada WHERE modificaciones_idmodificaciones='".$idmodificaciones."' AND UPPER(nombreAhorradorDice) NOT LIKE 'TOTAL%'";
 
 						$foliosNoEncontradosString=implode(",",$foliosNoEncontrados);
 						if(strlen($foliosNoEncontradosString)>0)
 							$sql.=" AND folioIdentificador NOT IN(".$foliosNoEncontradosString.")";
 						
-
 						$res=mysql_query($sql);
 
 						$diferenciaMontoMaximoPagoConvenio=0;
@@ -1252,45 +1346,49 @@
 
 
 
+
 							$erroresEnCalculados=0;
 
 							
 
 
 							// BUSCO QUE LOS SALDOS ESTEN BIEN CALCULADOS EN EL DEBE DECIR //
-							$montoAl100Calculado=$modCon["parteSocialDebeDecir"]+$modCon["cuentasDeAhorroDebeDecir"]+$modCon["cuentaDeInversionDebeDecir"]+$modCon["depositosEnGarantiaDebeDecir"]+$modCon["chequesNoCobradosDebeDecir"]+$modCon["otrosDepositosDebeDecir"]-$modCon["prestamosACargoDebeDecir"];
-							$montoAl100Calculado=round($montoAl100Calculado,2);
-							if($montoAl100Calculado!=$modCon["saldoNeto100DebeDecir"])
+							if($modCon["observacionesDice"]!="BAJA")
 							{
-								$cadenaError="El monto al 100% en DEBE DECIR del folio <strong>".$modCon["folioIdentificador"]."</strong> calculado es $".separarMiles($montoAl100Calculado)." y el archivo dice $".separarMiles($modCon["saldoNeto100DebeDecir"]);
-								echo "<span class='error'>".$cadenaError."</span>";
-								guardaErrorModificacion($idmodificaciones,$cadenaError);
-								$erroresEnCalculados=1;
-							}
+									$montoAl100Calculado=$modCon["parteSocialDebeDecir"]+$modCon["cuentasDeAhorroDebeDecir"]+$modCon["cuentaDeInversionDebeDecir"]+$modCon["depositosEnGarantiaDebeDecir"]+$modCon["chequesNoCobradosDebeDecir"]+$modCon["otrosDepositosDebeDecir"]-$modCon["prestamosACargoDebeDecir"];
+									$montoAl100Calculado=round($montoAl100Calculado,2);
+									if($montoAl100Calculado!=$modCon["saldoNeto100DebeDecir"])
+									{
+										$cadenaError="El monto al 100% en DEBE DECIR del folio <strong>".$modCon["folioIdentificador"]."</strong> calculado es $".separarMiles($montoAl100Calculado)." y el archivo dice $".separarMiles($modCon["saldoNeto100DebeDecir"]);
+										echo "<span class='error'>".$cadenaError."</span>";
+										guardaErrorModificacion($idmodificaciones,$cadenaError);
+										$erroresEnCalculados=1;
+									}
 
-							$montoAl70Calculado=$montoAl100Calculado*0.70;
-							$montoAl70Calculado=round($montoAl70Calculado,2);
-							
+									$montoAl70Calculado=$montoAl100Calculado*0.70;
+									$montoAl70Calculado=round($montoAl70Calculado,2);
+									
 
-							if($montoAl70Calculado!=$modCon["saldoNeto70DebeDecir"])
-							{
-								$cadenaError="El monto al 70% en DEBE DECIR  del folio <strong>".$modCon["folioIdentificador"]."</strong> calculado es $".separarMiles($montoAl70Calculado)." y el archivo dice $".separarMiles($modCon["saldoNeto70DebeDecir"]);
-								echo "<br><span class='error'>".$cadenaError."</span>";
-								guardaErrorModificacion($idmodificaciones,$cadenaError);
-								$erroresEnCalculados=1;
-							}
+									if($montoAl70Calculado!=$modCon["saldoNeto70DebeDecir"])
+									{
+										$cadenaError="El monto al 70% en DEBE DECIR  del folio <strong>".$modCon["folioIdentificador"]."</strong> calculado es $".separarMiles($montoAl70Calculado)." y el archivo dice $".separarMiles($modCon["saldoNeto70DebeDecir"]);
+										echo "<br><span class='error'>".$cadenaError."</span>";
+										guardaErrorModificacion($idmodificaciones,$cadenaError);
+										$erroresEnCalculados=1;
+									}
 
-							$montoMaximoCalculado=$montoAl70Calculado;
-							if($montoMaximoCalculado>MONTO_MAXIMO_PAGO_70)
-								$montoMaximoCalculado=MONTO_MAXIMO_PAGO_70;
+									$montoMaximoCalculadoDebeDecir=$montoAl70Calculado;
+									if($montoMaximoCalculadoDebeDecir>MONTO_MAXIMO_PAGO_70)
+										$montoMaximoCalculadoDebeDecir=MONTO_MAXIMO_PAGO_70;
 
-							if($montoMaximoCalculado!=$modCon["montoMaximoPagoDebeDecir"])
-							{
-								$cadenaError="El monto máximo de pago DEBE DECIR del folio <strong>".$modCon["folioIdentificador"]."</strong> calculado es $".separarMiles($montoMaximoCalculado)." y el archivo dice $".separarMiles($modCon["montoMaximoPagoDebeDecir"]);
-								echo "<br><span class='error'>".$cadenaError."</span>";
-								guardaErrorModificacion($idmodificaciones,$cadenaError);
-								$erroresEnCalculados=1;
-							}
+									if($montoMaximoCalculadoDebeDecir!=$modCon["montoMaximoPagoDebeDecir"])
+									{
+										$cadenaError="El monto máximo de pago DEBE DECIR del folio <strong>".$modCon["folioIdentificador"]."</strong> calculado es $".separarMiles($montoMaximoCalculadoDebeDecir)." y el archivo dice $".separarMiles($modCon["montoMaximoPagoDebeDecir"]);
+										echo "<br><span class='error'>".$cadenaError."</span>";
+										guardaErrorModificacion($idmodificaciones,$cadenaError);
+										$erroresEnCalculados=1;
+									}
+							}	
 							//FIN BUSCO QUE LOS SALDOS ESTEN BIEN CALCULADOS EN EL DEBE DECIR //	
 							echo "<br>";
 
@@ -1305,41 +1403,45 @@
 
 
 							// BUSCO QUE LOS SALDOS ESTEN BIEN CALCULADOS EN EL DICE //
-							$montoAl100Calculado=$modCon["parteSocialDice"]+$modCon["cuentasDeAhorroDice"]+$modCon["cuentaDeInversionDice"]+$modCon["depositosEnGarantiaDice"]+$modCon["chequesNoCobradosDice"]+$modCon["otrosDepositosDice"]-$modCon["prestamosACargoDice"];
-							$montoAl100Calculado=round($montoAl100Calculado,2);
-							if($montoAl100Calculado!=$modCon["saldoNeto100Dice"])
+							if($modCon["observacionesDice"]!="ALTA")
 							{
-								$cadenaError="El monto al 100% en DICE del folio <strong>".$modCon["folioIdentificador"]."</strong> calculado es $".separarMiles($montoAl100Calculado)." y el archivo dice $".separarMiles($modCon["saldoNeto100Dice"]);
-								echo "<span class='error'>".$cadenaError."</span>";
-								guardaErrorModificacion($idmodificaciones,$cadenaError);
-								$erroresEnCalculados=1;
-							}
+									$montoAl100Calculado=$modCon["parteSocialDice"]+$modCon["cuentasDeAhorroDice"]+$modCon["cuentaDeInversionDice"]+$modCon["depositosEnGarantiaDice"]+$modCon["chequesNoCobradosDice"]+$modCon["otrosDepositosDice"]-$modCon["prestamosACargoDice"];
+									$montoAl100Calculado=round($montoAl100Calculado,2);
+									if($montoAl100Calculado!=$modCon["saldoNeto100Dice"])
+									{
+										$cadenaError="El monto al 100% en DICE del folio <strong>".$modCon["folioIdentificador"]."</strong> calculado es $".separarMiles($montoAl100Calculado)." y el archivo dice $".separarMiles($modCon["saldoNeto100Dice"]);
+										echo "<span class='error'>".$cadenaError."</span>";
+										guardaErrorModificacion($idmodificaciones,$cadenaError);
+										$erroresEnCalculados=1;
+									}
 
-							$montoAl70Calculado=$montoAl100Calculado*0.70;
-							$montoAl70Calculado=round($montoAl70Calculado,2);
-							
+									$montoAl70Calculado=$montoAl100Calculado*0.70;
+									$montoAl70Calculado=round($montoAl70Calculado,2);	
+									
 
-							if($montoAl70Calculado!=$modCon["saldoNeto70Dice"])
-							{
-								$cadenaError="El monto al 70% en DICE  del folio <strong>".$modCon["folioIdentificador"]."</strong> calculado es $".separarMiles($montoAl70Calculado)." y el archivo dice $".separarMiles($modCon["saldoNeto70Dice"]);
-								echo "<br><span class='error'>".$cadenaError."</span>";
-								guardaErrorModificacion($idmodificaciones,$cadenaError);
-								$erroresEnCalculados=1;
-							}
+									if($montoAl70Calculado!=$modCon["saldoNeto70Dice"])
+									{
+										$cadenaError="El monto al 70% en DICE  del folio <strong>".$modCon["folioIdentificador"]."</strong> calculado es $".separarMiles($montoAl70Calculado)." y el archivo dice $".separarMiles($modCon["saldoNeto70Dice"]);
+										echo "<br><span class='error'>".$cadenaError."</span>";
+										guardaErrorModificacion($idmodificaciones,$cadenaError);
+										$erroresEnCalculados=1;
+									}
 
-							$montoMaximoCalculado=$montoAl70Calculado;
-							if($montoMaximoCalculado>MONTO_MAXIMO_PAGO_70)
-								$montoMaximoCalculado=MONTO_MAXIMO_PAGO_70;
+									$montoMaximoCalculadoDice=$montoAl70Calculado;
+									if($montoMaximoCalculadoDice>MONTO_MAXIMO_PAGO_70)
+										$montoMaximoCalculadoDice=MONTO_MAXIMO_PAGO_70;
 
-							if($montoMaximoCalculado!=$modCon["montoMaximoPagoDice"])
-							{
-								$cadenaError="El monto máximo de pago DICE del folio <strong>".$modCon["folioIdentificador"]."</strong> calculado es $".separarMiles($montoMaximoCalculado)." y el archivo dice $".separarMiles($modCon["montoMaximoPagoDice"]);
-								echo "<br><span class='error'>".$cadenaError."</span>";
-								guardaErrorModificacion($idmodificaciones,$cadenaError);
-								$erroresEnCalculados=1;
-							}
+									if($montoMaximoCalculadoDice!=$modCon["montoMaximoPagoDice"])
+									{
+										$cadenaError="El monto máximo de pago DICE del folio <strong>".$modCon["folioIdentificador"]."</strong> calculado es $".separarMiles($montoMaximoCalculadoDice)." y el archivo dice $".separarMiles($modCon["montoMaximoPagoDice"]);
+										echo "<br><span class='error'>".$cadenaError."</span>";
+										guardaErrorModificacion($idmodificaciones,$cadenaError);
+										$erroresEnCalculados=1;
+									}
+							}	
 							//FIN BUSCO QUE LOS SALDOS ESTEN BIEN CALCULADOS EN EL DICE //	
 							echo "<br>";
+							
 
 
 
@@ -1356,7 +1458,7 @@
 								$resP=mysql_query($sqlP);
 								$filP=mysql_fetch_assoc($resP);
 
-								$diferenciaMontoMaximoAhorrador=$montoMaximoCalculado-$filP["montoMaximo"];
+								$diferenciaMontoMaximoAhorrador=$montoMaximoCalculadoDebeDecir-$filP["montoMaximo"];
 								echo "<br>La diferencia del ahorrador ".$filP["nombre"]." en el monto máximo de pago es de $ ".separarMiles(round($diferenciaMontoMaximoAhorrador,2));
 								$diferenciaMontoMaximoPagoConvenio=$diferenciaMontoMaximoPagoConvenio+$diferenciaMontoMaximoAhorrador;
 							}
@@ -1364,14 +1466,14 @@
 
 							if($modCon["observacionesDice"]=="ALTA")
 							{								
-								echo "<br>Se dará de alta el ahorrador ".$modCon["nombreAhorradorDebeDecir"]." con un monto máximo de pago de $ ".separarMiles(round($montoMaximoCalculado,2));
-								$diferenciaMontoMaximoPagoConvenio=$diferenciaMontoMaximoPagoConvenio+$montoMaximoCalculado;
+								echo "<br>Se dará de alta el ahorrador ".$modCon["nombreAhorradorDebeDecir"]." con un monto máximo de pago de $ ".separarMiles(round($montoMaximoCalculadoDebeDecir,2));
+								$diferenciaMontoMaximoPagoConvenio=$diferenciaMontoMaximoPagoConvenio+$montoMaximoCalculadoDebeDecir;
 							}
 
 							if($modCon["observacionesDice"]=="BAJA" )
 							{
-								echo "<br>Se dará de baja el ahorrador ".$modCon["nombreAhorradorDice"]." con un monto máximo de pago de $ ".separarMiles(round($montoMaximoCalculado,2));
-								$diferenciaMontoMaximoPagoConvenio=$diferenciaMontoMaximoPagoConvenio-$montoMaximoCalculado;
+								echo "<br>Se dará de baja el ahorrador ".$modCon["nombreAhorradorDice"]." con un monto máximo de pago de $ ".separarMiles(round($montoMaximoCalculadoDebeDecir,2));
+								$diferenciaMontoMaximoPagoConvenio=$diferenciaMontoMaximoPagoConvenio-$montoMaximoCalculadoDebeDecir;
 							}
 							echo "<br>";
 
@@ -1416,9 +1518,15 @@
 						} // WHILE RECORRO TODA LA CONSOLIDADA //
 
 
+
+
+
+
 	 				echo "<br><br>";
 	 				// echo "LA DIFERENCIA EN EL MONTO DEL CONVENIO SERÍA: <strong>$ ".separarMiles($diferenciaMontoMaximoPagoConvenio)."</strong><br><br>";
 
+
+	 				$cadenaError="";
 	 				//Verifico que el monto por el cual se firmo el convenio alcance
 	 				$sqlMontoTotalConvenio="SELECT montoTotalConvenio,montoMaximoPagoTotal FROM convenio WHERE idconvenio='".$idconvenio."'";
 	 				$resMontoTotalConvenio=mysql_query($sqlMontoTotalConvenio);
@@ -1431,15 +1539,15 @@
 	 					//$cadenaError="El monto máximo por el que se firmo el convenio es <strong>$ ".separarMiles($montoFirmadoDelConvenio)."</strong> y esta modificación necesita <strong>$ ".separarMiles($diferenciaMontoMaximoPagoConvenio+$montoMaximoPagoTotal)."</strong>";
 						echo "Esta modificación a la base de datos es de: $".separarMiles($diferenciaMontoMaximoPagoConvenio)."<br>";
 	 					echo "El monto máximo del convenio autorizado es: $".separarMiles($montoFirmadoDelConvenio)."<br>";
-	 					echo "El nuevo monot máximo de pago es: $".separarMiles($diferenciaMontoMaximoPagoConvenio+$montoMaximoPagoTotal)."<br>";
-						echo $cadenaError."<span class='error'>RECHAZADA</span><br>";
+	 					echo "El nuevo monto máximo de pago es: $".separarMiles($diferenciaMontoMaximoPagoConvenio+$montoMaximoPagoTotal)."<br>";
+						echo $cadenaError."<br><br><span class='error'>RECHAZADA</span><br>";
 						guardaErrorModificacion($idmodificaciones,$cadenaError);
 	 				}
 	 				else
 	 				{
 	 					echo "Esta modificación a la base de datos es de: $".separarMiles($diferenciaMontoMaximoPagoConvenio)."<br>";
 	 					echo "El monto máximo del convenio autorizado es: $".separarMiles($montoFirmadoDelConvenio)."<br>";
-	 					echo "El nuevo monot máximo de pago es: $".separarMiles($diferenciaMontoMaximoPagoConvenio+$montoMaximoPagoTotal)."<br>";
+	 					echo "El nuevo monto máximo de pago es: $".separarMiles($diferenciaMontoMaximoPagoConvenio+$montoMaximoPagoTotal)."<br>";
 	 					echo "<span class='exito'>SUCEPTIBLE DE SER APROBADA</span>";
 	 					//echo "El monto máximo por el que se firmo el convenio es <strong>$ ".separarMiles($montoFirmadoDelConvenio)."</strong> y esta modificación necesita <strong>$ ".separarMiles($diferenciaMontoMaximoPagoConvenio+$montoMaximoPagoTotal)."</strong> <span class='exito'>SUCEPTIBLE DE SER APROBADA</span>";
 	 				}
@@ -1593,6 +1701,7 @@
 
 
 
+
 					echo "<br><br>";
 					//RECORRO TODA LA ANALÍTICA
 					$sql="SELECT * FROM modificacionesAnalitica WHERE modificaciones_idmodificaciones='".$idmodificaciones."' AND folioIdentificador<>'' ";
@@ -1644,11 +1753,18 @@
 
 
 
+					
 
+					$totalesDice=Array("importePS"=>0, "importeCA"=>0, "importeCI"=>0, "importeDG"=>0, "importeCNC"=>0, "importeOD"=>0, "importePC"=>0, "saldoNeto100"=>0, "saldoNeto70"=>0, "montoMaximoPago"=>0);
+					
 
+					//SALDOS MAL CALCULADOS EN EL DICE 2.0//	
+						$sql="SELECT * FROM modificacionesAnalitica WHERE modificaciones_idmodificaciones='".$idmodificaciones."' AND UPPER(nombreAhorrador) NOT LIKE 'TOTAL%' ORDER BY idmodificacionesAnalitica DESC";
+						$res=mysql_query($sql);
+						$fil=mysql_fetch_assoc($res);
+						$ultimoRegistroRevision=$fil;
 
-					//SALDOS MAL CALCULADOS EN EL DICE 2.0//					
-						$sql="SELECT * FROM modificacionesAnalitica WHERE folioIdentificador<>'' AND estatus='DICE' AND modificaciones_idmodificaciones='".$idmodificaciones."' ORDER BY idmodificacionesAnalitica";
+						$sql="SELECT * FROM modificacionesAnalitica WHERE folioIdentificador<>'' AND estatus='DICE' AND modificaciones_idmodificaciones='".$idmodificaciones."' AND UPPER(nombreAhorrador) NOT LIKE 'TOTAL%' ORDER BY idmodificacionesAnalitica";
 						//echo $sql."<br>";
 						$res=mysql_query($sql);
 						while($fil=mysql_fetch_assoc($res))
@@ -1658,25 +1774,62 @@
 							$alCienDice=$fil["saldoNeto100"];
 
 							$al100Calculado=$fil["importePS"]+$fil["importeCA"]+$fil["importeCI"]+$fil["importeDG"]+$fil["importeCNC"]+$fil["importeOD"]-$fil["importePC"];
-
-							$sql2="SELECT idmodificacionesAnalitica FROM modificacionesAnalitica WHERE folioIdentificador<>'' AND estatus='DEBE DECIR' AND idmodificacionesAnalitica>'".$idAuxInicial."' AND modificaciones_idmodificaciones='".$idmodificaciones."' ORDER BY idmodificacionesAnalitica LIMIT 1";
-							//echo $sql2."<br>";
-							$res2=mysql_query($sql2);
-							if(mysql_num_rows($res2)>0)
+							foreach($totalesDice as $campo => $valor)
 							{
-								$fil2=mysql_fetch_assoc($res2);
-								$idAuxFinal=$fil2["idmodificacionesAnalitica"];
-
-								$sql3="SELECT * FROM modificacionesAnalitica WHERE idmodificacionesAnalitica>'".$idAuxInicial."' AND idmodificacionesAnalitica<'".$idAuxFinal."' AND modificaciones_idmodificaciones='".$idmodificaciones."' ORDER BY idmodificacionesAnalitica";
-								//echo $sql3."<br>";
-								$res3=mysql_query($sql3);
-								while($fil3=mysql_fetch_assoc($res3))
-								{
-									$al100Calculado+=$fil3["importePS"]+$fil3["importeCA"]+$fil3["importeCI"]+$fil3["importeDG"]+$fil3["importeCNC"]+$fil3["importeOD"]-$fil3["importePC"];
-								}
+								$totalesDice[$campo]=$valor+$fil[$campo];
+								//echo "sumo ".$valor." y ".$fil[$campo]." en ".$campo."<br>";
 							}
-							$al100Calculado=round($al100Calculado,2);
+							
+							//PARA LAS FILAS ASOCIADAS
+								$sql2="SELECT idmodificacionesAnalitica FROM modificacionesAnalitica WHERE folioIdentificador<>'' AND estatus='DEBE DECIR' AND idmodificacionesAnalitica>'".$idAuxInicial."' AND modificaciones_idmodificaciones='".$idmodificaciones."' AND UPPER(nombreAhorrador) NOT LIKE 'TOTAL%'  ORDER BY idmodificacionesAnalitica LIMIT 1";
+								$res2=mysql_query($sql2);
+								if(mysql_num_rows($res2)>0)
+								{
+									$fil2=mysql_fetch_assoc($res2);
+									$idAuxFinal=$fil2["idmodificacionesAnalitica"];
+									$sql3="SELECT * FROM modificacionesAnalitica WHERE idmodificacionesAnalitica>'".$idAuxInicial."' AND idmodificacionesAnalitica<'".$idAuxFinal."' AND modificaciones_idmodificaciones='".$idmodificaciones."' AND UPPER(nombreAhorrador) NOT LIKE 'TOTAL%'  ORDER BY idmodificacionesAnalitica";
+									//echo $sql3."<br>";
+									$res3=mysql_query($sql3);
+									while($fil3=mysql_fetch_assoc($res3))
+									{
+										$al100Calculado+=$fil3["importePS"]+$fil3["importeCA"]+$fil3["importeCI"]+$fil3["importeDG"]+$fil3["importeCNC"]+$fil3["importeOD"]-$fil3["importePC"];
+										foreach($totalesDice as $campo => $valor)
+										{
+											$totalesDice[$campo]=$valor+$fil3[$campo];
+											//echo "sumo ".$valor." y ".$fil3[$campo]." en ".$campo."<br>";
+										}
+									}
+								}
+								else //YA NO HUBO SIGUIENTES AHORRADORES, EVALUO SI SOBRAN AÚN FILAS ASOCIADAS
+								{
+									//TRAIGO TODAS LAS FILAS "VACIAS" DE ADELANTE
+									$sql3="SELECT * FROM modificacionesAnalitica WHERE folioIdentificador='' AND estatus='' AND idmodificacionesAnalitica>".$idAuxInicial." AND modificaciones_idmodificaciones='".$idmodificaciones."' AND UPPER(nombreAhorrador) NOT LIKE 'TOTAL%'  ORDER BY idmodificacionesAnalitica";
+									$res3=mysql_query($sql3);
+									$consecutivo=$idAuxInicial;
+									while($fil3=mysql_fetch_assoc($res3))
+									{
+										$consecutivo++;
+										if($consecutivo==$fil3["idmodificacionesAnalitica"])
+										{
+											$al100Calculado+=$fil3["importePS"]+$fil3["importeCA"]+$fil3["importeCI"]+$fil3["importeDG"]+$fil3["importeCNC"]+$fil3["importeOD"]-$fil3["importePC"];
+											foreach($totalesDice as $campo => $valor)
+											{
+												$totalesDice[$campo]=$valor+$fil3[$campo];
+												//echo "sumo ".$valor." y ".$fil3[$campo]." en ".$campo."<br>";
+											}
+										}
+										else
+											break;
+									}
+								}								
+							//PARA LAS FILAS ASOCIADAS
 
+							
+
+
+
+
+							$al100Calculado=round($al100Calculado,2);
 							if($alCienDice!=$al100Calculado) //SON DIFERENTES
 							{
 								$cadenaError="El monto al 100% <strong>DICE</strong> del folio <strong>".$fil["folioIdentificador"]."</strong> en la base analítica dice <strong>$ ".separarMiles($alCienDice)."</strong> y el monto calculado es <strong>$ ".separarMiles($al100Calculado)."</strong>";
@@ -1690,8 +1843,16 @@
 
 
 
+
+
+
+
+
+
+					$totalesDebeDecir=Array("importePS"=>0, "importeCA"=>0, "importeCI"=>0, "importeDG"=>0, "importeCNC"=>0, "importeOD"=>0, "importePC"=>0, "saldoNeto100"=>0, "saldoNeto70"=>0, "montoMaximoPago"=>0);
+
 					//SALDOS MAL CALCULADOS EN EL DEBE DECIR 2.0//					
-						$sql="SELECT * FROM modificacionesAnalitica WHERE folioIdentificador<>'' AND estatus='DEBE DECIR' AND modificaciones_idmodificaciones='".$idmodificaciones."' ORDER BY idmodificacionesAnalitica";
+						$sql="SELECT * FROM modificacionesAnalitica WHERE folioIdentificador<>'' AND estatus='DEBE DECIR' AND modificaciones_idmodificaciones='".$idmodificaciones."' AND UPPER(nombreAhorrador) NOT LIKE 'TOTAL%'  ORDER BY idmodificacionesAnalitica";
 						$res=mysql_query($sql);
 						while($fil=mysql_fetch_assoc($res))
 						{
@@ -1700,21 +1861,56 @@
 							$alCienDice=$fil["saldoNeto100"];
 
 							$al100Calculado=$fil["importePS"]+$fil["importeCA"]+$fil["importeCI"]+$fil["importeDG"]+$fil["importeCNC"]+$fil["importeOD"]-$fil["importePC"];
-
-							$sql2="SELECT idmodificacionesAnalitica FROM modificacionesAnalitica WHERE folioIdentificador<>'' AND estatus='DICE' AND idmodificacionesAnalitica>'".$idAuxInicial."' AND modificaciones_idmodificaciones='".$idmodificaciones."' ORDER BY idmodificacionesAnalitica LIMIT 1";
-							$res2=mysql_query($sql2);
-							if(mysql_num_rows($res2)>0)
+							foreach($totalesDebeDecir as $campo => $valor)
 							{
-								$fil2=mysql_fetch_assoc($res2);
-								$idAuxFinal=$fil2["idmodificacionesAnalitica"];
-
-								$sql3="SELECT * FROM modificacionesAnalitica WHERE idmodificacionesAnalitica>'".$idAuxInicial."' AND idmodificacionesAnalitica<'".$idAuxFinal."' AND modificaciones_idmodificaciones='".$idmodificaciones."' ORDER BY idmodificacionesAnalitica";
-								$res3=mysql_query($sql3);
-								while($fil3=mysql_fetch_assoc($res3))
-								{
-									$al100Calculado+=$fil3["importePS"]+$fil3["importeCA"]+$fil3["importeCI"]+$fil3["importeDG"]+$fil3["importeCNC"]+$fil3["importeOD"]-$fil3["importePC"];
-								}
+								$totalesDebeDecir[$campo]=$valor+$fil[$campo];
 							}
+
+
+							//PARA LAS FILAS ASOCIADAS
+								$sql2="SELECT idmodificacionesAnalitica FROM modificacionesAnalitica WHERE folioIdentificador<>'' AND estatus='DICE' AND idmodificacionesAnalitica>'".$idAuxInicial."' AND modificaciones_idmodificaciones='".$idmodificaciones."' AND UPPER(nombreAhorrador) NOT LIKE 'TOTAL%'  ORDER BY idmodificacionesAnalitica LIMIT 1";
+								$res2=mysql_query($sql2);
+								if(mysql_num_rows($res2)>0)
+								{
+									$fil2=mysql_fetch_assoc($res2);
+									$idAuxFinal=$fil2["idmodificacionesAnalitica"];
+
+									$sql3="SELECT * FROM modificacionesAnalitica WHERE idmodificacionesAnalitica>'".$idAuxInicial."' AND idmodificacionesAnalitica<'".$idAuxFinal."' AND modificaciones_idmodificaciones='".$idmodificaciones."' AND UPPER(nombreAhorrador) NOT LIKE 'TOTAL%'  ORDER BY idmodificacionesAnalitica";
+									$res3=mysql_query($sql3);
+									while($fil3=mysql_fetch_assoc($res3))
+									{
+										$al100Calculado+=$fil3["importePS"]+$fil3["importeCA"]+$fil3["importeCI"]+$fil3["importeDG"]+$fil3["importeCNC"]+$fil3["importeOD"]-$fil3["importePC"];
+										foreach($totalesDebeDecir as $campo => $valor)
+										{
+											$totalesDebeDecir[$campo]=$valor+$fil3[$campo];
+										}
+									}
+								}
+								else //YA NO HUBO SIGUIENTES AHORRADORES, EVALUO SI SOBRAN AÚN FILAS ASOCIADAS
+								{
+									//TRAIGO TODAS LAS FILAS "VACIAS" DE ADELANTE
+									$sql3="SELECT * FROM modificacionesAnalitica WHERE folioIdentificador='' AND estatus='' AND idmodificacionesAnalitica>".$idAuxInicial." AND modificaciones_idmodificaciones='".$idmodificaciones."' AND UPPER(nombreAhorrador) NOT LIKE 'TOTAL%'  ORDER BY idmodificacionesAnalitica";
+									$res3=mysql_query($sql3);
+									$consecutivo=$idAuxInicial;
+									while($fil3=mysql_fetch_assoc($res3))
+									{
+										$consecutivo++;
+										if($consecutivo==$fil3["idmodificacionesAnalitica"])
+										{	
+											$al100Calculado+=$fil3["importePS"]+$fil3["importeCA"]+$fil3["importeCI"]+$fil3["importeDG"]+$fil3["importeCNC"]+$fil3["importeOD"]-$fil3["importePC"];
+											foreach($totalesDebeDecir as $campo => $valor)
+											{
+												$totalesDebeDecir[$campo]=$valor+$fil3[$campo];
+											}
+										}
+										else
+											break;
+									}
+								}		
+							//PARA LAS FILAS ASOCIADAS
+
+
+
 							$al100Calculado=round($al100Calculado,2);
 
 							if($alCienDice!=$al100Calculado) //SON DIFERENTES
@@ -1726,6 +1922,51 @@
 
 						}
 					//SALDOS MAL CALCULADOS EN EL DEBE DECIR 2.0//
+
+
+
+
+
+
+
+
+
+					
+
+					// SUMAS VERTICALES DICE ANALITICA
+					$leyendasImportes=Array("importePS"=>"Importe en parte social", "importeCA"=>"Importe en cuentas de ahorro", "importeCI"=>"Importe en cuentas de inversión", "importeDG"=>"Importe en depósitos en garantía", "importeCNC"=>"Importe en cheques no cobrados", "importeOD"=>"Importe en otros depósitos", "importePC"=>"Importe en préstamos a cargo", "saldoNeto100"=>"Saldo neto al 100% ", "saldoNeto70"=>"Saldo neto al 70%", "montoMaximoPago"=>"Monto máximo de pago");
+
+					$sqlArch="SELECT * FROM modificacionesAnalitica WHERE UPPER(nombreAhorrador) LIKE 'TOTAL DICE%' AND modificaciones_idmodificaciones='".$idmodificaciones."'";
+					//echo $sqlArch."<br>";
+					$resArch=mysql_query($sqlArch);
+					$filArch=mysql_fetch_assoc($resArch);
+					foreach($totalesDice as $campo => $valor)
+					{
+						//echo "comparo ".ROUND($valor,2)." con ".ROUND($totalesDice[$campo],2)."<br>";
+						if(ROUND($valor,2)!=ROUND($filArch[$campo],2))
+						{
+							$cadenaError="La suma calculada del campo ".$leyendasImportes[$campo]." en DICE de la base analítica es $ ".separarMiles(ROUND($valor))." y el archivo dice $ ".separarMiles(ROUND($filArch[$campo],2));
+							echo "<span class='error'>".$cadenaError."</span><br>";
+							guardaErrorModificacion($idmodificaciones,$cadenaError);
+						}
+					}
+					// SUMAS VERTICALES DICE ANALITICA
+
+					// SUMAS VERTICALES DEBE DECIR ANALITICA
+					$sqlArch="SELECT * FROM modificacionesAnalitica WHERE UPPER(nombreAhorrador) LIKE 'TOTAL DEBE DECIR%' AND modificaciones_idmodificaciones='".$idmodificaciones."'";
+					$resArch=mysql_query($sqlArch);
+					$filArch=mysql_fetch_assoc($resArch);
+					foreach($totalesDebeDecir as $campo => $valor)
+					{
+						if(ROUND($valor,2)!=ROUND($filArch[$campo],2))
+						{
+							$cadenaError="La suma calculada del campo ".$leyendasImportes[$campo]." en DEBE DECIR de la base analítica es $ ".separarMiles(ROUND($valor,2))." y el archivo dice $ ".separarMiles(ROUND($filArch[$campo],2));
+							echo "<span class='error'>".$cadenaError."</span><br>";
+							guardaErrorModificacion($idmodificaciones,$cadenaError);
+						}
+					}
+					// SUMAS VERTICALES DEBE DECIR ANALITICA
+
 
 
 
@@ -1841,7 +2082,7 @@
 					if($k!="a" && $k!="PHPSESSID")
 						echo "<input type='hidden' name='".$k."' value='".$v."' />";								
 				}
-				if($erroresTotalesReporte==0)
+				if($erroresTotalesReporte==0 && $_REQUEST["readOnly"]!=1)
 				{
 					?>
 					Al dar click en <strong>Continuar</strong> se se harán las modificaciones al convenio y al padrón de ahorradores

@@ -5,7 +5,7 @@ function Handle_OnRowClick(sender,args)
 	var idmodificaciones=_row.getDataItem()["idmodificaciones"];
 	//alert (idrevisionesTemporales);
 
-	location.href='./?a=muestraResumenReporte&idmodificaciones='+idmodificaciones;
+	location.href='./?a=muestraResumenReporte&idmodificaciones='+idmodificaciones+'&readOnly=1';
 
 }
 

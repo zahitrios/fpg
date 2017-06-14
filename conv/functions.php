@@ -71,7 +71,11 @@
 
 				<link href="https://fonts.googleapis.com/css?family=Raleway:300,400,700" rel="stylesheet">
 				<link rel="stylesheet" type="text/css" href="../styles.css">
-				<link rel="stylesheet" type="text/css" href="./styles.css">		
+				<link rel="stylesheet" type="text/css" href="./styles.css">
+
+				<link rel="stylesheet" type="text/css" href="<?php echo RUTA; ?>lib/CustomFileInputs/css/normalize.css" />
+				<link rel="stylesheet" type="text/css" href="<?php echo RUTA; ?>lib/CustomFileInputs/css/demo.css" />
+				<link rel="stylesheet" type="text/css" href="<?php echo RUTA; ?>lib/CustomFileInputs/css/component.css" />
 
 				<script text="javascript" src="//code.jquery.com/jquery-1.10.2.js"></script>
 				<script text="javascript" src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>				
@@ -118,6 +122,10 @@
 										formEdit();
 									break;
 
+									case "saveDocIde":
+										saveDocIde();										
+									break;
+
 									case "edicionConvenio":
 										edicionConvenio();
 									break;
@@ -151,6 +159,29 @@
 
 
 <?php
+
+function saveDocIde()
+{
+	global $_REQUEST;
+
+	// foreach($_REQUEST as $k => $v)
+	// {
+	// 	echo $k." -> ".$v."<br>";
+	// }
+	// echo "<br><br>";
+
+	$idconvenio=$_REQUEST["i"];
+	$documentosIdentidad=$_REQUEST["documentosIdentidad"];
+
+	foreach($documentosIdentidad as $k => $v)
+	{
+		$sql="INSERT INTO convenio_has_documentosIdentidad_has_tipoDocumentoIdentidad (convenio_idconvenio,has_iddocumentosIdentidad_has_tipoDocumentoIdentidadcol) VALUES ('".$idconvenio."','".$v."')";
+		$res=mysql_query($sql);
+	}
+	formEdit();
+}
+
+
 
 function edicionConvenio()
 {
@@ -357,30 +388,81 @@ function edicionConvenio()
 
 
 
-
-
-	else if($fechaDOF!="") //Va cambiar a publicado
+	else if($fechaDOF!="") //VA CAMBIAR A PUBLICADO
 	{
-		$nuevoStatusConvenio=3;
-		$fechaFinRegistro="";
-		$fechaFinPago="";
+		
+    	//SUBO EL ARCHIVO
+		$target_dir = "../convDofFiles/";
+		$target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
+		$uploadOk = 1;
 
-		$fechaDOF= date('Y-m-d', strtotime($fechaDOF));
-		//Calculo la fecha de fin de registro (60 días naturales más)		
-		$fechaFinRegistro=$fechaDOF;
-		$fechaFinRegistro= date('Y-m-d', strtotime($fechaFinRegistro. ' + 60 days'));
-		//Calculo la fecha de fin de pago (180 días naturales más)		
-		$fechaFinPago=$fechaDOF;
-		$fechaFinPago= date('Y-m-d', strtotime($fechaFinPago. ' + 180 days'));
+		$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
+		if ($_FILES["fileToUpload"]["size"] > 50000000) 
+		{
+		    $mensaje= "El archivo es demasiado grande, intente con uno menor a 50 megas";
+		    $uploadOk = 0;
+		}		
+		if($imageFileType != "pdf") 
+		{
+		    $mensaje= "Solo se admiten archivos PDF";
+		    $uploadOk = 0;
+		}		
+		if(file_exists($target_file))
+		{
+			$mensaje= "Ya existe un archivo con ese nombre en el servidor";
+		    $uploadOk = 0;
+		}	
+		if ($uploadOk == 0) 
+		{
+			//No se pudo subir el archivo
+			$urlRedirect=RUTA."conv/functions.php?a=formEdit&i=".$_REQUEST["i"]."&mensaje=".$mensaje;
+			header("LOCATION: ".$urlRedirect);
+		}
+		else //todo bien al subir el archivo
+		{
+		    if (!move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) 
+		    {
+		       //No se pudo subir el archivo
+		       $mensaje="Ocurrio un eror al subir el archivo";
+		       $urlRedirect=RUTA."conv/functions.php?a=formEdit&i=".$_REQUEST["i"]."&mensaje=".$mensaje;
+			   header("LOCATION: ".$urlRedirect);
+		    }
+
+		    $nuevoStatusConvenio=3;
+			$fechaFinRegistro="";
+			$fechaFinPago="";
+
+			$fechaDOF= date('Y-m-d', strtotime($fechaDOF));
+			//Calculo la fecha de fin de registro (60 días naturales más)		
+			$fechaFinRegistro=$fechaDOF;
+			$fechaFinRegistro= date('Y-m-d', strtotime($fechaFinRegistro. ' + 60 days'));
+			//Calculo la fecha de fin de pago (180 días naturales más)		
+			$fechaFinPago=$fechaDOF;
+			$fechaFinPago= date('Y-m-d', strtotime($fechaFinPago. ' + 180 days'));
 
 
-		$sqlUpd="UPDATE convenio SET  
-             fechaDOF='".$fechaDOF."',
-             fechaFinRegistro='".$fechaFinRegistro."',
-             fechaFinPago='".$fechaFinPago."', 
-             statusConvenio_idstatusConvenio='".$nuevoStatusConvenio."' 
-             WHERE idconvenio='".$idconvenio."'";
-    	$resUpd=mysql_query($sqlUpd);
+			$sqlUpd="UPDATE convenio SET  
+	             fechaDOF='".$fechaDOF."',
+	             fechaFinRegistro='".$fechaFinRegistro."',
+	             fechaFinPago='".$fechaFinPago."', 
+	             statusConvenio_idstatusConvenio='".$nuevoStatusConvenio."' 
+	             WHERE idconvenio='".$idconvenio."'";
+	    	$resUpd=mysql_query($sqlUpd);
+
+		}
+		//SUBO EL ARCHIVO
+				
+
+
+
+
+	
+
+
+
+
+
+
 
 	}
 
@@ -540,7 +622,31 @@ function formEdit()
 					$filConvCap=mysql_fetch_assoc($resConvCap);
 
 					if($filConvCap["total"]>0)
+					{
 						echo $dateDOF->Render();
+
+						echo "<br><br>";
+						echo "Archivo PDF del DOF: ";
+						?>
+
+						<div class="box" style="width:400px; height:200px; padding-top:13px;">
+							<input type="file" name="fileToUpload" id="file-5" class="inputfile inputfile-4" data-multiple-caption="{count} archivo seleccionado" style="display:none;" />
+							<label for="file-5">
+								<figure>
+									<svg xmlns="http://www.w3.org/2000/svg" width="20" height="17" viewBox="0 0 20 17">
+										<path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"/>
+									</svg>
+								</figure>
+								<span>Elegir un archivo&hellip;</span>
+							</label>
+						</div>
+						<br><br>
+						<!-- <input type="submit" value="Subir" class="botonRojoChico"> -->
+						<script src="<?php echo RUTA; ?>lib/CustomFileInputs/js/custom-file-input.js"></script>
+						<span class="mensaje" style="color:#FF0000;"><?php echo $_REQUEST["mensaje"]; ?></span>		
+						<?php
+						echo "<br><br>";
+					}
 					else
 						echo "<strong class='error'>DEBE AGREGAR UNA CAPACITACIÓN AL CONVENIO</strong>";
 
@@ -610,16 +716,91 @@ function formEdit()
 
 	<br><br>
 	<div class="separador"></div>
+	<br><br>	
+
+
+
+
+
+
+	<!-- DOCUMENTOS DE IDENTIDAD -->
+	<div class="tablaCentrada">	
+	<strong>DOCUMENTOS DE IDENTIDAD</strong>
+		<br><br>
+
+		<div class="mitadIzquierda">
+			<strong>Documentos de identidad aceptados:</strong>
+				<div class="cajonCuadroDocumentos" style="margin:0 !important;">
+					<ul>
+						<?php $options = dameIdDocumentosIdentidad($idconvenio);
+						foreach($options as $key => $opt): ?>
+							<li><?= $opt[1]." - ".$opt[2]; ?></li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
+			<br><br>
+		</div>
+
+
+
+		<div class="mitadDerecha">			
+			<?php
+				if($convenio['idstatusConvenio']>1 && $convenio['idstatusConvenio']<5) //Incluye firmado, operacion, proceso
+				{
+					$options2=dameIdDocumentosIdentidadSinAgregar($idconvenio);
+					?>
+						<form action="./functions.php" method="post">
+							<strong>Agregar documentos de identidad:</strong>
+							<div class="cajonCuadroDocumentos" style="margin:0 !important; padding:7px;">
+								<?php
+									foreach($options2 as $k => $registro)
+									{
+										echo '<input type="checkbox" name="documentosIdentidad[]" value="'.$registro[0].'">&nbsp;&nbsp;'.$registro[1].' - '.$registro[2].'<br/>';
+									}
+								?>
+							</div>
+							<br>
+							<input type="hidden" name="a" value="saveDocIde" />
+							<input type="hidden" name="i" value="<?php echo $idconvenio; ?>" />
+
+							<input type="submit" class="botonRojo" value="Guardar documentos"  />
+						</form>
+					<?php
+
+				}
+				else
+				{
+					echo "<span class='subTitulos'>PARA ASOCIAR DOCUMENTOS EL CONVENIO DEBE ESTAR FIRMADO O EN OPERACIÓN</span>";
+				}
+			?>
+		</div>
+
+		<div style="clear:both;"></div>
+
+	</div>
+	<!-- DOCUMENTOS DE IDENTIDAD -->
+
+
+
+
+
+
+
+
+
+	<br><br>
+	<div class="separador"></div>
 	<br><br>		
 
 
 
 
+	<!-- DOCUMENTOS DE VALOR -->
 	<div class="tablaCentrada">	
 
 
 		<div class="mitadIzquierda">
-			<strong>Documentos aceptados:</strong>
+			<strong>Documentos de valor aceptados:</strong>
 				<div class="cajonCuadroDocumentos" style="margin:0 !important;">
 					<ul>
 						<?php $options = dameIdDocumentos($idrevisionesTemporales);
@@ -735,7 +916,7 @@ function formEdit()
 		</div>
 		<div style="clear:both;"></div>
 	</div>	
-
+	<!-- DOCUMENTOS DE VALOR -->
 
 
 	<br><br>
@@ -748,7 +929,7 @@ function formEdit()
 
 
 	<div class="tablaCentrada">	
-		<strong>RELACIÓN DE SOCIEDADES Y DOCUMENTOS</strong>
+		<strong>RELACIÓN DE SOCIEDADES Y DOCUMENTOS DE VALOR</strong>
 		<br><br>
 
 		<?php

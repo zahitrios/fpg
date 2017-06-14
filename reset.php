@@ -17,6 +17,11 @@
 	$sql[]="TRUNCATE resumenCertificadas";
 
 
+	$sql[]="TRUNCATE documentosIdentidad_has_tipoDocumentoIdentidad";
+	$sql[]="TRUNCATE documentosIdentidad";
+	
+
+
 	$sql[]="TRUNCATE revisionesTemporales";
 	$sql[]="TRUNCATE sociedadesTemporales";
 	$sql[]="TRUNCATE analiticasTemporales";
