@@ -402,7 +402,7 @@ function edicionConvenio()
 		    $mensaje= "El archivo es demasiado grande, intente con uno menor a 50 megas";
 		    $uploadOk = 0;
 		}		
-		if($imageFileType != "pdf") 
+		if(strtoupper($imageFileType) != "PDF") 
 		{
 		    $mensaje= "Solo se admiten archivos PDF";
 		    $uploadOk = 0;
@@ -445,24 +445,13 @@ function edicionConvenio()
 	             fechaDOF='".$fechaDOF."',
 	             fechaFinRegistro='".$fechaFinRegistro."',
 	             fechaFinPago='".$fechaFinPago."', 
-	             statusConvenio_idstatusConvenio='".$nuevoStatusConvenio."' 
+	             statusConvenio_idstatusConvenio='".$nuevoStatusConvenio."', 
+	             pdfDOF='".basename($_FILES["fileToUpload"]["name"])."'     
 	             WHERE idconvenio='".$idconvenio."'";
 	    	$resUpd=mysql_query($sqlUpd);
 
 		}
 		//SUBO EL ARCHIVO
-				
-
-
-
-
-	
-
-
-
-
-
-
 
 	}
 
@@ -628,7 +617,7 @@ function formEdit()
 						echo "<br><br>";
 						echo "Archivo PDF del DOF: ";
 						?>
-
+				
 						<div class="box" style="width:400px; height:200px; padding-top:13px;">
 							<input type="file" name="fileToUpload" id="file-5" class="inputfile inputfile-4" data-multiple-caption="{count} archivo seleccionado" style="display:none;" />
 							<label for="file-5">
@@ -643,7 +632,9 @@ function formEdit()
 						<br><br>
 						<!-- <input type="submit" value="Subir" class="botonRojoChico"> -->
 						<script src="<?php echo RUTA; ?>lib/CustomFileInputs/js/custom-file-input.js"></script>
+						<input type="hidden" name="a" value="uploadPDF">
 						<span class="mensaje" style="color:#FF0000;"><?php echo $_REQUEST["mensaje"]; ?></span>		
+				
 						<?php
 						echo "<br><br>";
 					}
@@ -657,6 +648,13 @@ function formEdit()
 				{
 					echo "Fecha de la publicación en el DOF: ";
 					echo convierteTimeStampCorto($convenio["fechaDOF"]);
+					echo "<br>";
+					if($convenio["pdfDOF"]!="")
+					{
+						?>
+						<iframe src="http://docs.google.com/viewer?url=<?php echo "http://72.10.33.187".RUTA."convDofFiles/".$convenio["pdfDOF"]; ?>&embedded=true" width="300" height="390" style="border: none;"></iframe>
+						<?php
+					}
 					echo "<br><br>";
 				}
 			

@@ -137,8 +137,7 @@
 
 			$sqlU="UPDATE modificaciones SET errores=".$errores." WHERE idmodificaciones='".$fil["idmodificaciones"]."'";
 			$resU=mysql_query($sqlU);
-		}
-		
+		}		
 	}
 
 	function formularioSubida()
@@ -161,8 +160,6 @@
 				</label>
 			</div>
 
-
-
 			<br><br>
 			<input type="submit" value="Subir" class="botonRojoChico">
 			
@@ -173,6 +170,8 @@
 		<span class="mensaje"><?php echo $mensaje; ?></span>		
 		<?php
 	}
+
+
 
 
 	function gridModificaciones()
@@ -247,8 +246,6 @@
 		$grid->MasterTable->AddColumn($column);		
 
 
-
-
 		$grid->Localization->Load("../lib/KoolPHPSuite/KoolControls/KoolGrid/localization/es.xml");
 		$grid->Process();
 
@@ -267,8 +264,9 @@
 			<br><br><br>
 		</div>
 		<?php
-
 	}
+
+
 
 
 	function upload()
@@ -321,6 +319,9 @@
 		    <?php
 		}	
 	}
+
+
+
 
 	function muestraPosiblesHojas($file)
 	{
@@ -400,8 +401,6 @@
 			echo "<br>";
 			$erroresCabeceras++;
 		}
-
-		
 
 
 
@@ -1346,7 +1345,7 @@
 
 
 
-
+ 
 							$erroresEnCalculados=0;
 
 							
@@ -1479,10 +1478,29 @@
 
 
 
-							// VERIFICO QUE LAS ALTAS TENGAN BIEN EL FOLIO IDENTIFICADOR (SSSAAAAA)//
+							
 							if($modCon["observacionesDice"]=="ALTA")
 							{
-								$folioIdentificadorNuevo=trim($modCon["folioIdentificador"]);
+
+								//VERIFICO QUE LAS ALTAS NO TENGAN NADA EN EL DICE//
+								$camposQueNoDebenTenerImporte=Array("parteSocialDice","cuentasDeAhorroDice","cuentaDeInversionDice","depositosEnGarantiaDice","chequesNoCobradosDice","otrosDepositosDice","prestamosACargoDice","saldoNeto100Dice","saldoNeto70Dice","montoMaximoPagoDice");
+								$leyendasQueNoDebenTenerImporte=Array("DICE PARTE SOCIAL","DICE CUENTAS DE AHORRO","DICE CUENTAS DE INVERSIÓN","DICE DEPÓSITOS EN GARANTIA","DICE CHEQUES NO COBRADOS","DICE OTROS DEPÓSITOS","DICE PRÉSTAMOS A CARGO","DICE SALDO NETO AL 100%","DICE SALDO NETO AL 70%","DICE MONTO MÁXIMO DE PAGO");
+
+								foreach($camposQueNoDebenTenerImporte as $indiceCamposQueNoDebenTenerImporte => $valorCamposQueNoDebenTenerImporte)
+								{
+									if($modCon[$valorCamposQueNoDebenTenerImporte]>0)
+									{
+										$cadenaError="El ahorrador ".$modCon["nombreAhorradorDebeDice"]." no debe contar con importe en el campo <strong>".$leyendasQueNoDebenTenerImporte[$indiceCamposQueNoDebenTenerImporte]."</strong> porque será dado de alta, el importe incorrecto es <strong>$ ".separarMiles($modCon[$valorCamposQueNoDebenTenerImporte])."</strong>";
+										echo '<span class="error">'.$cadenaError."</span><br>";
+										guardaErrorModificacion($idmodificaciones,$cadenaError);
+									}
+								}
+								//VERIFICO QUE LAS ALTAS NO TENGAN NADA EN EL DICE//
+
+
+
+								// VERIFICO QUE LAS ALTAS TENGAN BIEN EL FOLIO IDENTIFICADOR (SSSAAAAA)//
+								$folioIdentificadorNuevo=trim($modCon["folioIdentificador"]); 
 								if(strlen($folioIdentificadorNuevo)<8)
 								{
 									$cadenaError="El folio del ahorrador ".$modCon["nombreAhorradorDice"]." no cuenta con el formato correcto SSSAAAAA en la base consolidada";
@@ -1499,6 +1517,7 @@
 										guardaErrorModificacion($idmodificaciones,$cadenaError);
 									}
 								}
+								// VERIFICO QUE LAS ALTAS TENGAN BIEN EL FOLIO IDENTIFICADOR (SSSAAAAA)//
 							}
 							
 
@@ -1774,6 +1793,7 @@
 							$alCienDice=$fil["saldoNeto100"];
 
 							$al100Calculado=$fil["importePS"]+$fil["importeCA"]+$fil["importeCI"]+$fil["importeDG"]+$fil["importeCNC"]+$fil["importeOD"]-$fil["importePC"];
+							//echo $sql."<br>";
 							foreach($totalesDice as $campo => $valor)
 							{
 								$totalesDice[$campo]=$valor+$fil[$campo];
@@ -1853,6 +1873,7 @@
 
 					//SALDOS MAL CALCULADOS EN EL DEBE DECIR 2.0//					
 						$sql="SELECT * FROM modificacionesAnalitica WHERE folioIdentificador<>'' AND estatus='DEBE DECIR' AND modificaciones_idmodificaciones='".$idmodificaciones."' AND UPPER(nombreAhorrador) NOT LIKE 'TOTAL%'  ORDER BY idmodificacionesAnalitica";
+						//echo $sql."<br>";
 						$res=mysql_query($sql);
 						while($fil=mysql_fetch_assoc($res))
 						{
@@ -1863,7 +1884,7 @@
 							$al100Calculado=$fil["importePS"]+$fil["importeCA"]+$fil["importeCI"]+$fil["importeDG"]+$fil["importeCNC"]+$fil["importeOD"]-$fil["importePC"];
 							foreach($totalesDebeDecir as $campo => $valor)
 							{
-								$totalesDebeDecir[$campo]=$valor+$fil[$campo];
+								$totalesDebeDecir[$campo]+=$fil[$campo];
 							}
 
 
@@ -1882,7 +1903,8 @@
 										$al100Calculado+=$fil3["importePS"]+$fil3["importeCA"]+$fil3["importeCI"]+$fil3["importeDG"]+$fil3["importeCNC"]+$fil3["importeOD"]-$fil3["importePC"];
 										foreach($totalesDebeDecir as $campo => $valor)
 										{
-											$totalesDebeDecir[$campo]=$valor+$fil3[$campo];
+											if($campo!="saldoNeto100" && $campo!="saldoNeto70" && $campo!="montoMaximoPago")
+												$totalesDebeDecir[$campo]+=$fil3[$campo];
 										}
 									}
 								}
@@ -1900,7 +1922,8 @@
 											$al100Calculado+=$fil3["importePS"]+$fil3["importeCA"]+$fil3["importeCI"]+$fil3["importeDG"]+$fil3["importeCNC"]+$fil3["importeOD"]-$fil3["importePC"];
 											foreach($totalesDebeDecir as $campo => $valor)
 											{
-												$totalesDebeDecir[$campo]=$valor+$fil3[$campo];
+												if($campo!="saldoNeto100" && $campo!="saldoNeto70" && $campo!="montoMaximoPago")
+													$totalesDebeDecir[$campo]+=$fil3[$campo];
 											}
 										}
 										else
@@ -1921,6 +1944,10 @@
 							}
 
 						}
+						// $totalesDebeDecir["saldoNeto100"]=$totalesDebeDecir["importePS"]+$totalesDebeDecir["importeCA"]+$totalesDebeDecir["importeCI"]+$totalesDebeDecir["importeDG"]+$totalesDebeDecir["importeCNC"]+$totalesDebeDecir["importeOD"]-$totalesDebeDecir["importePC"];
+						// $totalesDebeDecir["saldoNeto70"]=$totalesDebeDecir["saldoNeto100"]*0.70;
+
+						// , "saldoNeto100"=>0, "saldoNeto70"=>0, "montoMaximoPago"=>0
 					//SALDOS MAL CALCULADOS EN EL DEBE DECIR 2.0//
 
 
@@ -1954,6 +1981,7 @@
 
 					// SUMAS VERTICALES DEBE DECIR ANALITICA
 					$sqlArch="SELECT * FROM modificacionesAnalitica WHERE UPPER(nombreAhorrador) LIKE 'TOTAL DEBE DECIR%' AND modificaciones_idmodificaciones='".$idmodificaciones."'";
+					//echo $sqlArch."<br>";
 					$resArch=mysql_query($sqlArch);
 					$filArch=mysql_fetch_assoc($resArch);
 					foreach($totalesDebeDecir as $campo => $valor)
@@ -2349,14 +2377,34 @@
 
 
 
+
+
 			// TRAIGO TODAS LAS BAJAS TABLA ahorrador//
 			$sqlMod="SELECT * FROM modificacionesConsolidada WHERE modificaciones_idmodificaciones='".$idmodificaciones."' AND UPPER(observacionesDice) LIKE '%BAJA%'";
 			$resMod=mysql_query($sqlMod);
 			while($filMod=mysql_fetch_assoc($resMod))
 			{
 				echo "<br>DANDO DE BAJA AHORRADOR: ".$filMod["nombreAhorradorDice"];
-				//$idconvenio
 				
+
+				//GUARDO EN EL HISTÓRICO LOS MONTOS ACTUALES
+				$sqlAho="SELECT * FROM ahorrador WHERE folioIdentificador='".$filMod["folioIdentificador"]."'";
+				$resAho=mysql_query($sqlAho);
+				$filAho=mysql_fetch_assoc($resAho);
+				guardaHistorialAhorradorConsolidada($filAho);
+				//FIN DE GUARDO EN EL HISTÓRICO LOS MONTOS ACTUALES
+
+
+				//PONGO TODOS SUS MONTOS EN CERO
+				$sql="UPDATE ahorrador SET montoAl100=0, montoAl70=0, montoMaximo=0, sca=0, sci=0, sps=0, sdg=0, scnc=0, spc=0, sod=0 WHERE folioIdentificador='".$filMod["folioIdentificador"]."'";
+				//echo $sql."<br>";
+				$res=mysql_query($sql);
+				// if(!$res)
+				// {
+				// 	echo mysql_error()."<br>";
+				// 	die;
+				// }
+
 				$sql="UPDATE ahorrador SET baja=1 WHERE folioIdentificador='".$filMod["folioIdentificador"]."'";
 				if($res=mysql_query($sql))
 				{
@@ -2370,6 +2418,9 @@
 
 			echo "<br><br><br>";
 			echo "<div class='separador'></div>";
+
+
+
 
 
 

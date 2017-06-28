@@ -11,7 +11,13 @@
 	));
 	// Send the request & save response to $resp
 	$resp = curl_exec($curl);
-	echo $resp;
+	//$regex='<script>[\s\S]*?<\/script>';
+	$regex = '#<\s*?script\b[^>]*>(.*?)</script\b[^>]*>#s';
+	$code = preg_replace($regex, '', $resp);
+	
+
+
+	echo $code;
 	// Close request to clear up some resources
 	curl_close($curl);
 

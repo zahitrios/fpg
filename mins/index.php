@@ -502,6 +502,7 @@
 
 		//BUSCO SI YA HAY CONVENIOS FIRMADOS CON ESE ESTADO, PUBLICADOS O EN PROCESO
 		$sql="SELECT * FROM convenio WHERE estado_idestado='".$idEstado."' AND statusConvenio_idstatusConvenio IN (3,4)"; 
+		echo $sql."<br>";
 		$res=mysql_query($sql);
 		if(mysql_num_rows($res)<=0) //No hay convenios firmados con ese estado
 		{
@@ -634,6 +635,42 @@
 		}
 		//CHECO EL NUMERO CONSECUTIVO
 		echo "<br><br>";
+
+
+
+
+
+
+		//BUSCO QUE LOS REPRESENTANTES LEGALES NO ESTÉN MÁS DE TRES VECES EN EL ARCHIVO
+		$sql="SELECT  representanteAlbacea, COUNT(*) AS total  FROM registrosMinistraciones WHERE representanteAlbacea<>'' AND ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' GROUP BY representanteAlbacea";
+		//echo $sql."<br>";
+		$res=mysql_query($sql);
+		while($fil=mysql_fetch_assoc($res))
+		{
+			if($fil["total"]>3)
+			{
+				$cadenaError="El representante o albacea: <strong>".$fil["representanteAlbacea"]."</strong> aparece más de tres veces en el archivo";
+				echo "<span class='error'>".$cadenaError."</span><br>";
+				guardaErrorMinistracion($idministracionesTemporales,$cadenaError);
+			}
+			//BUSCO CUANTAS VECES APARECE ESE ALBACEA EN EL CONVENIO			
+			$sql2="SELECT COUNT(*) AS total  FROM registrosMinistraciones INNER JOIN ministracionesTemporales ON ministracionesTemporales_idministracionesTemporales=idministracionesTemporales INNER JOIN convenio ON idconvenio=convenio_idconvenio WHERE idconvenio='".$idConvenio."' AND representanteAlbacea='".$fil["representanteAlbacea"]."'"; 
+			//echo $sql2."<br>";
+			$res2=mysql_query($sql2);
+			$fil2=mysql_fetch_assoc($res2);
+			if(($fil2["total"]+$fil["total"])>3 && $fil["total"]<3)
+			{
+				$cadenaError="El representante o albacea: <strong>".$fil["representanteAlbacea"]."</strong> ya aparece ".$fil2["total"]." veces en este convenio y aparece ".$fil["total"]." en el archivo; Un representante o albacea solo puede representar a tres personas por convenio";
+				echo "<span class='error'>".$cadenaError."</span><br>";
+				guardaErrorMinistracion($idministracionesTemporales,$cadenaError);
+			}
+		}
+		//BUSCO QUE LOS REPRESENTANTES LEGALES NO ESTÉN MÁS DE TRES VECES EN EL ARCHIVO
+		echo "<br><br>";
+
+
+
+
 
 
 
@@ -809,7 +846,7 @@
 
 
 		//VERIFICO QUE LAS SUMAS SEAN CORRECTAS
-		$sqlFol="SELECT *,ROUND((parteSocial+cuentasAhorro+cuentasInversion+depositosGarantia+chequesNoCobrados+otrosDepositos+prestamosCargo),2) AS suma FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND folioIdentificador NOT IN(".implode(",",$foliosMalos).") AND ROUND((parteSocial+cuentasAhorro+cuentasInversion+depositosGarantia+chequesNoCobrados+otrosDepositos+prestamosCargo),2) <> saldoTotal"; 
+		$sqlFol="SELECT *,ROUND((parteSocial+cuentasAhorro+cuentasInversion+depositosGarantia+chequesNoCobrados+otrosDepositos-prestamosCargo),2) AS suma FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND folioIdentificador NOT IN(".implode(",",$foliosMalos).") AND ROUND(parteSocial+cuentasAhorro+cuentasInversion+depositosGarantia+chequesNoCobrados+otrosDepositos-prestamosCargo,2) <> saldoTotal"; 
 		$resFol=mysql_query($sqlFol);
 		echo "Montos mal calculados por ahorrador: <strong>".mysql_num_rows($resFol)."</strong>";
 		if(mysql_num_rows($resFol)>0)
@@ -835,19 +872,24 @@
 
 
 		// VERIFICO QUE EL MONTO A MINISTRAR SEA EL 70%
-		$sqlFol="SELECT *,ROUND((parteSocial+cuentasAhorro+cuentasInversion+depositosGarantia+chequesNoCobrados+otrosDepositos-prestamosCargo)*0.70,2) AS suma FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND folioIdentificador NOT IN(".implode(",",$foliosMalos).") "; 
+		$sqlFol="SELECT * FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND folioIdentificador NOT IN(".implode(",",$foliosMalos).")"; 
+		//echo $sqlFol."<br>";
 		//$sqlFol="SELECT *,ROUND((saldoTotal*0.70),2) AS paraMinistrar FROM registrosMinistraciones WHERE ministracionesTemporales_idministracionesTemporales='".$idministracionesTemporales."' AND folioIdentificador NOT IN(".implode(",",$foliosMalos).") AND ROUND((saldoTotal*0.70),2) <> montoMinistrar"; 
 		$resFol=mysql_query($sqlFol);
 		while($filFol=mysql_fetch_assoc($resFol))
 		{
-			$montoCalculado=$filFol["suma"];
+			//$montoCalculado=$filFol["suma"];
+			$montoCalculado=$filFol["parteSocial"]+ $filFol["cuentasAhorro"]+ $filFol["cuentasInversion"]+ $filFol["depositosGarantia"]+ $filFol["chequesNoCobrados"]+ $filFol["otrosDepositos"]- $filFol["prestamosCargo"];
+			$montoCalculado=$montoCalculado*0.70;
+			$montoCalculado=round($montoCalculado,2);
+
 			if($montoCalculado>MONTO_MAXIMO_PAGO_70)
 				$montoCalculado=MONTO_MAXIMO_PAGO_70;
 
 
 			if($montoCalculado!=$filFol["montoMinistrar"])
 			{	
-				$cadenaError="El monto para ministrar del ahorrador: <strong>".$filFol["nombreAhorrador"]."</strong> debe ser <strong>$ ".separarMiles($montoCalculado)."</strong> y el archivo indica <strong>$ ".separarMiles($filFol["montoMinistrar"])."</strong> ";
+				$cadenaError="El monto para ministrar del ahorrador: <strong>".$filFol["nombreAhorrador"]."</strong> debe ser <strong>$ ".separarMiles($montoCalculado)."</strong> y el archivo indica <strong>$ ".separarMiles(round($filFol["montoMinistrar"],2))."</strong> ";
 				echo "<span class='error'>".$cadenaError."</span><br>";
 				guardaErrorMinistracion($idministracionesTemporales,$cadenaError);
 				$foliosMalos[]=$filFol["folioIdentificador"];
@@ -905,9 +947,9 @@
 			}
 
 			//VALIDO QUE NO SE PIDA MÁS DE LO QUE ES SU MONTO MÁXIMO DE PAGO
-			if($filFol["montoMinistrar"]>$filAhorrador["montoMaximo"])
+			if(round($filFol["montoMinistrar"],2)>round($filAhorrador["montoMaximo"],2))
 			{
-				$cadenaError="EL MONTO PARA MINISTRAR MÁXIMO DEBE SER $ ".separarMiles($filAhorrador["montoMaximo"])." Y EL ARCHIVO INDICA $ ".separarMiles($filFol["montoMinistrar"]);
+				$cadenaError="EL MONTO PARA MINISTRAR MÁXIMO DEBE SER $ ".separarMiles($filAhorrador["montoMaximo"])." Y EL ARCHIVO INDICA $ ".separarMiles(round($filFol["montoMinistrar"],2));
 				echo "<span class='error'>".$cadenaError."</span>";
 				guardaErrorMinistracion($idministracionesTemporales,$cadenaError);
 			}
